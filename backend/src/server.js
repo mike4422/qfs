@@ -66,4 +66,4 @@ app.use((err, req, res, next)=>{
   res.status(500).json({ message: 'Server error' })
 })
 
-app.listen(PORT, ()=> console.log(`API listening on http://localhost:${PORT}`))
+app.listen(PORT,"0.0.0.0", ()=> console.log(`API listening on http://localhost:${PORT}`))
