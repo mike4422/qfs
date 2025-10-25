@@ -25,7 +25,7 @@ import Admin from "./pages/dashboard/Admin.jsx";
 import Support from "./pages/dashboard/Support"
 import Secure401IRAStart from "./pages/dashboard/Secure401IRAStart"
 import Secure401IRAConfirmation from "./pages/dashboard/Secure401IRAConfirmation"
-import Secure401IRAHistory from "./pages/dashboard/Secure401IRAHistory"
+import Secure401IRAHIstory from "./pages/dashboard/Secure401IRAHIstory"
 
 export default function App() {
   return (
@@ -66,7 +66,7 @@ export default function App() {
           <Route path="support" element={<Support />} />
           <Route path="secure401ira/start" element={<Secure401IRAStart />} />
           <Route path="secure401ira/confirmation" element={<Secure401IRAConfirmation />} />
-          <Route path="secure401ira/history" element={<Secure401IRAHistory />} />
+          <Route path="secure401ira/history" element={<Secure401IRAHIstory />} />
         </Route>
 
         {/* Catch-all */}
