@@ -1,4 +1,6 @@
 // src/components/AboutQFS.jsx
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
+
 export default function AboutQFS() {
   return (
     <section className="relative py-20">
@@ -76,8 +78,8 @@ export default function AboutQFS() {
 
             {/* CTA buttons */}
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a
-                href="/about"
+              <NavLink
+                to="/about"
                 className="inline-flex items-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 shadow"
               >
                 Learn more about QFS
@@ -90,7 +92,7 @@ export default function AboutQFS() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-              </a>
+              </NavLink>
 
               {/* <a
                 href="/register"
