@@ -30,7 +30,17 @@ import walletsyncRoutes from "./routes/walletsync.js";
 
 
 const app = express()
-app.use(cors({ origin: CLIENT_URL, credentials: true }))
+
+const allowed = [
+  "https://qfsworldwide.net",
+  "https://www.qfsworldwide.net",
+  "http://localhost:5173"
+]
+app.use(cors({
+  origin: (o, cb) => (!o || allowed.includes(o) ? cb(null, true) : cb(new Error("Not allowed"))),
+  credentials: true
+}))
+// app.use(cors({ origin: CLIENT_URL, credentials: true }))
 app.use(express.json())
 
 // static serve uploaded files (optional)
