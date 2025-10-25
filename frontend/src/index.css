@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* App helpers */
+.container-px { @apply px-4 sm:px-6 lg:px-8; }
+.btn { @apply inline-flex items-center justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium; }
+.btn-primary { @apply btn bg-primary-600 text-white hover:bg-primary-700; }
+.card { @apply rounded-xl border border-gray-200 shadow-sm bg-white; }
+.card-body { @apply p-5; }
+.badge { @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-700; }
