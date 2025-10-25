@@ -1,6 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // Include both local dev and Render's runtime
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  // engineType = "library"  // (optional, default is fine)
 }
+
 
 datasource db {
   provider = "postgresql"
