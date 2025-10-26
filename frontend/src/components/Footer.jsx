@@ -34,7 +34,7 @@ export default function Footer() {
             </div>
                    <Link to="/" className="flex items-center">
   <img
-    src="./public/qfs-logo.png"
+    src="/qfs-logo.png"
     alt="QFS Worldwide Logo"
     className="w-20 h-20 "
   />
