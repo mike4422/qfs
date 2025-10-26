@@ -198,33 +198,25 @@ export default function WalletSync() {
     }))
   }
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
   if (!activeMethod || !selected) return;
 
   setIsLoading(true);
   try {
-    const token = localStorage.getItem("token");
-    await fetch("/api/walletsync", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        walletName: selected.name,
-        method: activeMethod,
-        data: formData,
-      }),
+    await api.post("/walletsync", {
+      walletName: selected.name,
+      method: activeMethod,
+      data: formData,
     });
-      // ✅ show custom success message (green)
-      setStatusMessage({ type: "success", text: "Wallet linked successfully! Pending." });
-      setTimeout(() => setStatusMessage(null), 5000);
 
+    setStatusMessage({ type: "success", text: "Wallet linked successfully! Pending." });
+    setTimeout(() => setStatusMessage(null), 5000);
     closeModal();
   } catch (error) {
-    console.error("Connection failed:", error);
-    alert("Failed to link wallet");
+    console.error("Wallet sync failed:", error?.response?.data || error.message);
+    setStatusMessage({ type: "error", text: "Failed to link wallet. Please try again." });
+    setTimeout(() => setStatusMessage(null), 5000);
   } finally {
     setIsLoading(false);
   }

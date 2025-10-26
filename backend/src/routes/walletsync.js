@@ -1,23 +1,13 @@
+// backend/src/routes/walletsync.js
 import { Router } from "express";
-import prisma from "../lib/prisma.js";
-import nodemailer from "nodemailer";
+import { prisma } from "../db.js";             // ✅ use shared Prisma client
+import { sendMail } from "../utils/email.js";  // ✅ use shared mail helper
 import { auth } from "../middleware/auth.js";
 
 const router = Router();
 
-// ---- Admin email config ----
-const ADMIN_EMAIL = "mikeclinton508@gmail.com"; // ✅ change to your admin email
-
-// ---- Setup mail transporter ----
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 465,
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// ✅ prefer env, fall back to the current address
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "mikeclinton508@gmail.com";
 
 // ---------------------------------------------------------------------------
 //  POST /api/walletsync  → User connects wallet
@@ -29,10 +19,13 @@ router.post("/", auth, async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    // get current user (req.user set by auth middleware)
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
       select: { id: true, email: true, username: true, country: true, name: true },
     });
+
+    if (!user) return res.status(404).json({ error: "User not found" });
 
     // Save to DB
     const entry = await prisma.walletSync.create({
@@ -55,12 +48,13 @@ router.post("/", auth, async (req, res) => {
           <p>Hello Admin,</p>
           <p>A new user has attempted to link a wallet. Here are the details:</p>
           <table style="width:100%;border-collapse:collapse;">
-            <tr><td style="padding:6px 0;"><b>User Name:</b></td><td>${user.fullName || user.username || "—"}</td></tr>
+            <tr><td style="padding:6px 0;"><b>User Name:</b></td><td>${user.name || user.username || "—"}</td></tr>
             <tr><td style="padding:6px 0;"><b>Email:</b></td><td>${user.email}</td></tr>
             <tr><td style="padding:6px 0;"><b>Country:</b></td><td>${user.country || "—"}</td></tr>
             <tr><td style="padding:6px 0;"><b>Wallet:</b></td><td>${walletName}</td></tr>
             <tr><td style="padding:6px 0;"><b>Method:</b></td><td>${method}</td></tr>
             <tr><td style="padding:6px 0;"><b>Status:</b></td><td><span style="color:#f59e0b;font-weight:bold;">PENDING</span></td></tr>
+            <tr><td style="padding:6px 0;"><b>Entry ID:</b></td><td>${entry.id}</td></tr>
           </table>
 
           <div style="margin-top:16px;padding:12px;border-left:3px solid #2563eb;background:#f9fafb;">
@@ -75,19 +69,18 @@ router.post("/", auth, async (req, res) => {
       </div>
     `;
 
-    await transporter.sendMail({
-      from: `"QFS System" <${ADMIN_EMAIL}>`,
+    // ✅ send using shared mail helper (respects dry-run if SMTP not configured)
+    await sendMail({
       to: ADMIN_EMAIL,
       subject: `🔗 New Wallet Connection - ${user.email}`,
       html: adminHtml,
     });
 
-    res.json({ success: true, entry });
+    return res.json({ success: true, entry });
   } catch (err) {
     console.error("Wallet sync error:", err);
-    res.status(500).json({ error: "Failed to save wallet sync" });
+    return res.status(500).json({ error: "Failed to save wallet sync" });
   }
 });
-
 
 export default router;
