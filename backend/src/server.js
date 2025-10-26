@@ -37,21 +37,10 @@ const allowed = [
   "http://localhost:5173"
 ]
 
-const corsOpts = {
-  origin: allowed,
-  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'],
-  optionsSuccessStatus: 204,
-}
-app.use(cors(corsOpts))
-app.options('*', cors(corsOpts))
-
-// app.use(cors({
-//   origin: (o, cb) => (!o || allowed.includes(o) ? cb(null, true) : cb(new Error("Not allowed"))),
-//   credentials: true
-// }))
-
-
+app.use(cors({
+  origin: (o, cb) => (!o || allowed.includes(o) ? cb(null, true) : cb(new Error("Not allowed"))),
+  credentials: true
+}))
 // app.use(cors({ origin: CLIENT_URL, credentials: true }))
 app.use(express.json())
 
