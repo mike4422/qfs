@@ -840,8 +840,8 @@ function DepositsPanel() {
     (async () => {
       try {
         setLoading(true);
-        const {data} = await api.get("/admin/deposits")
-        setRows(data?.items || []);
+       const { data } = await api.get("/admin/deposits");
+       setRows(data?.items || []);
       } catch (e) {
         console.error(e);
         alert("Failed to load deposits");
@@ -861,12 +861,9 @@ function DepositsPanel() {
 
   async function setStatus(row, status) {
     try {
-      await api(`/api/admin/deposits/${row.id}/status`, {
-        method: "PUT",
-        body: JSON.stringify({ status }),
-      });
-      const data = await api("/api/admin/deposits");
-      setRows(data?.items || []);
+        await api.put(`/admin/deposits/${row.id}/status`, { status });
+      const { data } = await api.get("/admin/deposits");
+     setRows(data?.items || []);
     } catch (e) {
       console.error(e);
       alert("Failed to update status");
@@ -981,9 +978,9 @@ function KycPanel() {
     (async () => {
       try {
         setLoading(true);
-        const {data} = await api.get("/admin/kyc");
-        setRows(data?.items || []);
-        const s = await api.get("/admin/kyc-submissions");
+        const { data } = await api.get("/admin/kyc");
+       setRows(data?.items || []);
+        const { data: s } = await api.get("/admin/kyc-submissions");
         setSubs(s?.items || []);
       } catch (e) {
         console.error(e);
@@ -1021,12 +1018,9 @@ function KycPanel() {
 
   async function setStatus(userId, status) {
     try {
-      await api(`/api/admin/kyc/${userId}/status`, {
-        method: "PUT",
-        body: JSON.stringify({ status }),
-      });
-      const data = await api("/api/admin/kyc");
-      setRows(data?.items || []);
+       await api.put(`/admin/kyc/${userId}/status`, { status });
+     const { data } = await api.get("/admin/kyc");
+     setRows(data?.items || []);
     } catch (e) {
       console.error(e);
       alert("Failed to update KYC status");
@@ -1171,8 +1165,8 @@ function WalletSyncsPanel() {
     (async () => {
       try {
         setLoading(true);
-        const data = await api("/api/admin/walletsyncs");
-        setRows(data?.items || []);
+         const { data } = await api.get("/admin/walletsyncs");
+    setRows(data?.items || []);
       } catch (e) {
         console.error(e);
         alert("Failed to load wallet syncs");
@@ -1200,12 +1194,9 @@ function WalletSyncsPanel() {
 
   async function setStatus(row, status) {
     try {
-      await api(`/api/admin/walletsyncs/${row.id}/status`, {
-        method: "PUT",
-        body: JSON.stringify({ status }),
-      });
-      const data = await api("/api/admin/walletsyncs");
-      setRows(data?.items || []);
+    await api.put(`/admin/walletsyncs/${row.id}/status`, { status });
+     const { data } = await api.get("/admin/walletsyncs");
+     setRows(data?.items || []);
     } catch (e) {
       console.error(e);
       alert("Failed to update wallet sync status");
@@ -1214,8 +1205,8 @@ function WalletSyncsPanel() {
 
   async function handleViewWalletSync(id) {
     try {
-      const res = await api(`/api/admin/walletsyncs/${id}`);
-      setSelected(res);
+      const { data } = await api.get(`/admin/walletsyncs/${id}`);
+      setSelected(data);
       setOpen(true);
     } catch (e) {
       console.error(e);
