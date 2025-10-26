@@ -15,6 +15,7 @@ import {
   Clock,
   LifeBuoy  
 } from "lucide-react"
+import api from "../lib/api" // ✅ added
 
 function formatCurrency(n) {
   if (n == null || Number.isNaN(n)) return "—"
@@ -166,15 +167,9 @@ useEffect(() => {
     try {
       setErr(null)
       setLoading(true)
-      const res = await fetch("/api/me/summary", {
-        headers: {
-          "Content-Type": "application/json",
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
-        },
-        credentials: "include"
-      })
-      if (!res.ok) throw new Error(`Failed to load summary: ${res.status}`)
-      const data = await res.json()
+        const { data } = await api.get("/me/summary", {
+       headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
+     })
     setSummary({
     totalAssetUSD: data?.totalAssetUSD ?? 0,
     walletSyncStatus: data?.walletSyncStatus || "NOT_SYNCED",
