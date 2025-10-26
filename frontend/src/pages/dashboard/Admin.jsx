@@ -595,6 +595,17 @@ function EditUserDrawer({ user, onClose, onSaved }) {
   );
 }
 
+// ---- SMALL HELPER COMPONENT ------------------------------------------------
+function FormRow({ label, children }) {
+  return (
+    <div>
+      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <div className="mt-1">{children}</div>
+    </div>
+  );
+}
+
+
 function FundModal({ user, onClose, onFunded }) {
   const [symbol, setSymbol] = useState("USDT");
   const [amount, setAmount] = useState("");
