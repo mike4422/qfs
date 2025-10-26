@@ -38,7 +38,7 @@ export default function Navbar() {
         {/* Brand */}
        <Link to="/" className="flex items-center space-x-2">
   <img
-    src="/frontend/public/qfs-logo-b.png"
+    src="/qfs-logo-b.png"
     alt="QFS Worldwide Logo"
     className="w-20 h-20 "
   />
