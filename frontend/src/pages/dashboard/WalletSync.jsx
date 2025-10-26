@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { X, Eye, EyeOff, Shield, Key, FileText } from "lucide-react"
+import api from "../../lib/api";
+
 
 /** Build a proxy URL to bypass hotlink/CORS issues */
 const proxify = (url) => {
