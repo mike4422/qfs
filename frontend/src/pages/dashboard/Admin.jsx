@@ -450,22 +450,23 @@ function UsersPanel() {
 }
 
 function EditUserDrawer({ user, onClose, onSaved }) {
-  const [form, setForm] = useState({
-    fullName: user.fullName || user.name || "",
-    username: user.username || "",
-    email: user.email || "",
-    wallets: user.wallets || {},
-    kycStatus: user.kycStatus || "NOT_VERIFIED",
-    country: user.country || "",
-    city: user.city || "",
-    phone: user.phone || "",
-  });
+  const [form, setForm] = useState(() => ({
+    fullName: user?.fullName || user?.name || "",
+    username: user?.username || "",
+    email: user?.email || "",
+    wallets: user?.wallets || {},
+    kycStatus: user?.kycStatus || "NOT_VERIFIED",
+    country: user?.country || "",
+    city: user?.city || "",
+    phone: user?.phone || "",
+  }));
+
   const [saving, setSaving] = useState(false);
 
   async function save() {
     try {
       setSaving(true);
-      await api.put(`/admin/users/${user.id}`, {
+      await api(`/api/admin/users/${user.id}`, {
         method: "PUT",
         body: JSON.stringify(form),
       });
@@ -478,6 +479,8 @@ function EditUserDrawer({ user, onClose, onSaved }) {
     }
   }
 
+  if (!user) return null; // prevent empty render crash
+
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
@@ -488,6 +491,7 @@ function EditUserDrawer({ user, onClose, onSaved }) {
             Close
           </PillButton>
         </div>
+
         <div className="mt-4 space-y-4">
           <FormRow label="Full name">
             <input
@@ -498,6 +502,7 @@ function EditUserDrawer({ user, onClose, onSaved }) {
               className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
             />
           </FormRow>
+
           <FormRow label="Username">
             <input
               value={form.username}
@@ -507,6 +512,7 @@ function EditUserDrawer({ user, onClose, onSaved }) {
               className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
             />
           </FormRow>
+
           <FormRow label="Email">
             <input
               value={form.email}
@@ -518,39 +524,36 @@ function EditUserDrawer({ user, onClose, onSaved }) {
           </FormRow>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-  <div>
-    <label className="text-sm font-medium">Country</label>
-    <input
-      value={form.country}
-      onChange={(e) => setForm({ ...form, country: e.target.value })}
-      className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
-    />
-  </div>
-  <div>
-    <label className="text-sm font-medium">City</label>
-    <input
-      value={form.city}
-      onChange={(e) => setForm({ ...form, city: e.target.value })}
-      className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
-    />
-  </div>
-  <div>
-    <label className="text-sm font-medium">Phone</label>
-    <input
-      value={form.phone}
-      onChange={(e) => setForm({ ...form, phone: e.target.value })}
-      placeholder="+1 555 000 0000"
-      className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
-    />
-  </div>
-</div>
+            <FormRow label="Country">
+              <input
+                value={form.country}
+                onChange={(e) => setForm({ ...form, country: e.target.value })}
+                className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
+              />
+            </FormRow>
 
+            <FormRow label="City">
+              <input
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
+              />
+            </FormRow>
+
+            <FormRow label="Phone">
+              <input
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                placeholder="+1 555 000 0000"
+                className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
+              />
+            </FormRow>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {["BTC", "ETH", "USDT_TRC20", "USDT_ERC20", "XLM", "XRP", "BNB"].map(
               (k) => (
-                <div key={k}>
-                  <label className="text-sm font-medium">{k} Wallet</label>
+                <FormRow key={k} label={`${k} Wallet`}>
                   <input
                     value={(form.wallets || {})[k] || ""}
                     onChange={(e) =>
@@ -562,7 +565,7 @@ function EditUserDrawer({ user, onClose, onSaved }) {
                     placeholder="address"
                     className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
                   />
-                </div>
+                </FormRow>
               )
             )}
           </div>
@@ -594,6 +597,7 @@ function EditUserDrawer({ user, onClose, onSaved }) {
     </div>
   );
 }
+
 
 // ---- SMALL HELPER COMPONENT ------------------------------------------------
 function FormRow({ label, children }) {
