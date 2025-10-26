@@ -87,16 +87,44 @@ router.put('/users/:id', async (req, res, next) => {
 });
 
 router.post('/users/:id/fund', async (req, res, next) => {
-    console.log("[admin] fund user", req.params.id, req.body);
+  console.log("[admin] fund user", req.params.id, req.body);
   try {
     const id = Number(req.params.id);
     const { symbol, amount } = req.body || {};
     assert(symbol && amount, 'symbol and amount are required');
 
-    await prisma.$transaction(async (tx) => {
+    // wrap all writes together
+    const result = await prisma.$transaction(async (tx) => {
+      // 1) credit holding
       await addFunds(id, symbol, amount, tx);
+
+      // 2) create a Deposit so it appears in Admin → Deposits
+      const dep = await tx.deposit.create({
+        data: {
+          userId: id,
+          symbol,
+          amount: new Decimal(amount).toString(),
+          txId: `ADMIN_${Date.now()}`,         // any marker you like
+          adminStatus: 'APPROVED',             // it was an instant admin credit
+        },
+      });
+
+      // 3) create a Transaction so it appears in user history
+      await tx.transaction.create({
+        data: {
+          userId: id,
+          type: 'DEPOSIT',
+          amount: new Decimal(amount).toString(),
+          status: 'CONFIRMED',
+          symbol,
+          ref: `DP_${dep.id}`,                 // matches /admin/deposits/:id/status updater
+        },
+      });
+
+      return dep;
     });
 
+    // best-effort email to the user
     try {
       const u = await prisma.user.findUnique({ where: { id } });
       if (u?.email) {
@@ -108,11 +136,16 @@ router.post('/users/:id/fund', async (req, res, next) => {
 <p>— QFS Support</p>`,
         });
       }
-    } catch (e) { console.error('[mailer] fund notice failed:', e.message); }
+    } catch (e) {
+      console.error('[mailer] fund notice failed:', e.message);
+    }
 
-    res.json({ ok: true });
-  } catch (e) { next(e); }
+    res.json({ ok: true, depositId: result.id });
+  } catch (e) {
+    next(e);
+  }
 });
+
 
 router.post('/users/:id/wipe-balances', async (req, res, next) => {
   try {
