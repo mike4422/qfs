@@ -106,7 +106,7 @@ export default function Register() {
         password: form.password,
       };
 
-      const { data } = await api.post("/auth/register", payload);
+      const { data } = await api.post("/api/auth/register", payload);
       setMsg(data.message || "Registration successful. Check your email to verify.");
       setForm({
         name: "",
