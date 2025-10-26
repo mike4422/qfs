@@ -39,7 +39,7 @@ export default function WhatWeDo() {
           {/* Left: image (no frame, border, or bg) */}
           <div className="order-1">
             <img
-              src="./public/qfs2.png"
+              src="/qfs2.png"
               alt="Asset-backed digital finance"
               className="w-full h-[360px] sm:h-[420px] lg:h-[520px] object-cover rounded-2xl"
               loading="lazy"

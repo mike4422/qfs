@@ -50,7 +50,7 @@ export default function ISO20022() {
           {/* Right column becomes first on mobile */}
           <div className="order-1 lg:order-2 lg:overflow-visible lg:-mr-24">
             <img
-              src="./public/qfs.png"
+              src="/qfs.png"
               alt="AI-driven security technology"
               className="w-full h-[360px] sm:h-[420px] lg:h-[520px] object-contain rounded-2xl"
               loading="lazy"
