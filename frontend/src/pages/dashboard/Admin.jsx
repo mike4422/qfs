@@ -466,7 +466,7 @@ function EditUserDrawer({ user, onClose, onSaved }) {
   async function save() {
     try {
       setSaving(true);
-      await api(`/api/admin/users/${user.id}`, {
+      await api(`/admin/users/${user.id}`, {
         method: "PUT",
         body: JSON.stringify(form),
       });
@@ -619,7 +619,7 @@ function FundModal({ user, onClose, onFunded }) {
     if (!amount || Number(amount) <= 0) return alert("Enter a positive amount");
     try {
       setSubmitting(true);
-      await api(`/api/admin/users/${user.id}/fund`, {
+      await api(`/admin/users/${user.id}/fund`, {
         method: "POST",
         body: JSON.stringify({ symbol, amount }),
       });
@@ -1125,7 +1125,7 @@ function KycPanel() {
             {(sub.files || []).map((f) => (
               <a
                 key={f.id}
-                href={`/api/admin/kyc-files/${f.id}`}
+                href={`/admin/kyc-files/${f.id}`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center rounded-lg bg-white px-2 py-1 text-[11px] font-medium text-gray-800 ring-1 ring-gray-200"
