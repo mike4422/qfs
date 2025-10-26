@@ -695,8 +695,8 @@ function WithdrawalsPanel() {
     (async () => {
       try {
         setLoading(true);
-        const {data} = await api.get("/admin/withdrawals")
-        setRows(data?.items || []);
+         const { data } = await api.get("/admin/withdrawals");
+       setRows(data?.items || []);
       } catch (e) {
         console.error(e);
         alert("Failed to load withdrawals");
@@ -716,11 +716,8 @@ function WithdrawalsPanel() {
 
   async function setStatus(row, status) {
     try {
-      await api(`/api/admin/withdrawals/${row.id}/status`, {
-        method: "PUT",
-        body: JSON.stringify({ status }),
-      });
-      const data = await api("/api/admin/withdrawals");
+      await api.put(`/admin/withdrawals/${row.id}/status`, { status });
+     const { data } = await api.get("/admin/withdrawals");
       setRows(data?.items || []);
     } catch (e) {
       console.error(e);
