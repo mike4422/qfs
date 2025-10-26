@@ -26,30 +26,31 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // Fetch fresh profile from backend and update context
+  // ✅ fixed (removed duplicate /api)
   const refresh = async () => {
-    const { data } = await api.get("/api/users/me"); // <-- /api prefix
+    const { data } = await api.get("/users/me");
     if (data?.user) setUser(data.user);
     return data.user;
   };
 
+  // ✅ fixed (removed duplicate /api)
   const login = async (email, password) => {
-    const { data } = await api.post("/api/auth/login", { email, password }); // <-- /api prefix
+    const { data } = await api.post("/auth/login", { email, password });
     localStorage.setItem("token", data.token);
     setUser(data.user);
-    // ALSO store qfs_user because Admin.jsx relies on it
     localStorage.setItem("qfs_user", JSON.stringify({ ...data.user, token: data.token }));
     return data.user;
   };
 
+  // ✅ fixed (removed duplicate /api)
   const register = async (payload) => {
-    const { data } = await api.post("/api/auth/register", payload); // <-- /api prefix
+    const { data } = await api.post("/auth/register", payload);
     return data;
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("qfs_user"); // keep storage consistent
+    localStorage.removeItem("qfs_user");
     setUser(null);
   };
 
