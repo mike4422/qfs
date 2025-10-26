@@ -49,7 +49,7 @@ export async function register(req, res) {
       },
     });
 
-    const link = `https://qfs-zoma.onrender.com/api/api/auth/verify?token=${verificationToken}`;
+    const link = `https://qfs-zoma.onrender.com/api/auth/verify?token=${verificationToken}`;
 
    await sendMail({
   to: emailLc,
