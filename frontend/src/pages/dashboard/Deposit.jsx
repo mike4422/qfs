@@ -6,6 +6,7 @@ import {
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../store/auth"
+import api from "../../lib/api"   // ✅ added this line
 
 // --- tiny helpers
 const cls = (...a) => a.filter(Boolean).join(" ")
@@ -131,26 +132,18 @@ const [submitMsg, setSubmitMsg] = useState(null)
     setSubmitting(true)
 
     // POST to backend (you’ll add this route): /api/wallet/deposit/confirm
-    const res = await fetch(`/api/wallet/deposit/confirm`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
-      },
-      body: JSON.stringify({
-        symbol: selected.symbol,
-        network,
-        amount: amountInput,
-        txId: txId || null,
-        address,
-        memo: tag || null,
-      })
-    })
-
-    const json = await res.json().catch(() => ({}))
-    if (!res.ok) {
-      throw new Error(json.message || `Failed (${res.status})`)
-    }
+   const { data } = await api.post(
+       "/wallet/deposit/confirm",
+       {
+         symbol: selected.symbol,
+         network,
+         amount: amountInput,
+         txId: txId || null,
+         address,
+         memo: tag || null,
+       },
+       { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }
+     )
 
     setSubmitMsg({ type: "ok", text: "Deposit request sent. You’ll be notified after review." })
     // optional reset:
@@ -171,20 +164,12 @@ const [submitMsg, setSubmitMsg] = useState(null)
     setTag("")
     try {
       // Adjust to your backend route; this is what we wired earlier patterns with auth.
-      const res = await fetch(`/api/wallet/deposit/address?symbol=${encodeURIComponent(sym)}&network=${encodeURIComponent(net)}`, {
-        credentials: "include",
-        headers: {
-          "Accept": "application/json",
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
-        }
-      })
-      if (!res.ok) {
-        const j = await res.json().catch(() => ({}))
-        throw new Error(j.message || `Failed (${res.status})`)
-      }
-      const j = await res.json()
-      setAddress(j.address || "")
-      setTag(j.memo || j.tag || "")
+      const { data } = await api.get(
+       `/wallet/deposit/address?symbol=${encodeURIComponent(sym)}&network=${encodeURIComponent(net)}`,
+       { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }
+     )
+     setAddress(data.address || "")
+     setTag(data.memo || data.tag || "")
     } catch (e) {
       setAddrError(e.message || "Unable to fetch address")
     } finally {
