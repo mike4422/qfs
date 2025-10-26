@@ -466,10 +466,9 @@ function EditUserDrawer({ user, onClose, onSaved }) {
   async function save() {
     try {
       setSaving(true);
-      await api(`/admin/users/${user.id}`, {
-        method: "PUT",
-        body: JSON.stringify(form),
-      });
+
+     await api.put(`/admin/users/${user.id}`, form);
+
       onSaved();
     } catch (e) {
       console.error(e);
@@ -619,10 +618,9 @@ function FundModal({ user, onClose, onFunded }) {
     if (!amount || Number(amount) <= 0) return alert("Enter a positive amount");
     try {
       setSubmitting(true);
-      await api(`/admin/users/${user.id}/fund`, {
-        method: "POST",
-        body: JSON.stringify({ symbol, amount }),
-      });
+      
+     await api.post(`/admin/users/${user.id}/fund`, { symbol, amount });
+
       onFunded();
     } catch (e) {
       console.error(e);

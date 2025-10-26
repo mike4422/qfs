@@ -63,6 +63,7 @@ router.get('/users', async (req, res, next) => {
 });
 
 router.put('/users/:id', async (req, res, next) => {
+     console.log("[admin] update user", req.params.id);
   try {
     const id = Number(req.params.id);
     const { name, fullName, username, email, wallets, kycStatus, country, phone, city } = req.body || {};
@@ -86,6 +87,7 @@ router.put('/users/:id', async (req, res, next) => {
 });
 
 router.post('/users/:id/fund', async (req, res, next) => {
+    console.log("[admin] fund user", req.params.id, req.body);
   try {
     const id = Number(req.params.id);
     const { symbol, amount } = req.body || {};
@@ -509,6 +511,7 @@ router.get('/kyc-submissions/:id', async (req, res, next) => {
 
 // --- Get all wallet syncs
 router.get("/walletsyncs", async (req, res) => {
+    console.log("[admin] walletsync view", req.params.id);
   try {
     const admin = await prisma.user.findUnique({ where: { id: req.user.id } });
     if (admin.role !== "ADMIN") return res.status(403).json({ error: "Unauthorized" });
@@ -527,6 +530,9 @@ router.get("/walletsyncs", async (req, res) => {
 
 // --- Update wallet sync status + notify user ---
 router.put("/walletsyncs/:id/status", async (req, res) => {
+    // inside router.put("/walletsyncs/:id/status", ...)
+console.log("[admin] walletsync status update", req.params.id, req.body.status);
+
   try {
     // ✅ Step 1: Verify admin session safely
     if (!req.user || !req.user.id) {
@@ -548,6 +554,7 @@ router.put("/walletsyncs/:id/status", async (req, res) => {
     if (!valid.includes(status)) {
       return res.status(400).json({ error: "Invalid status" });
     }
+    
 
     // ✅ Step 3: Update wallet sync record
     const record = await prisma.walletSync.update({
