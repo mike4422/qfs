@@ -87,67 +87,32 @@ router.put('/users/:id', async (req, res, next) => {
 });
 
 router.post('/users/:id/fund', async (req, res, next) => {
-  console.log("[admin] fund user", req.params.id, req.body);
+    console.log("[admin] fund user", req.params.id, req.body);
   try {
     const id = Number(req.params.id);
     const { symbol, amount } = req.body || {};
     assert(symbol && amount, 'symbol and amount are required');
 
-    const result = await prisma.$transaction(async (tx) => {
-      // ✅ 1. Add funds to user's holdings
+    await prisma.$transaction(async (tx) => {
       await addFunds(id, symbol, amount, tx);
-
-      // ✅ 2. Create deposit record
-      const deposit = await tx.deposit.create({
-        data: {
-          userId: id,
-          symbol,
-          amount: amount.toString(),
-          txId: `ADMIN-${Date.now()}`,
-          status: "APPROVED",
-        },
-      });
-
-      // ✅ 3. Create corresponding transaction record
-      await tx.transaction.create({
-        data: {
-          userId: id,
-          type: "DEPOSIT",
-          ref: `DP_${deposit.id}`,
-          amount: amount.toString(),
-          symbol,
-          status: "CONFIRMED",
-          description: `Admin deposit of ${amount} ${symbol}`,
-        },
-      });
-
-      return deposit;
     });
 
-    // ✅ 4. Notify user
     try {
       const u = await prisma.user.findUnique({ where: { id } });
       if (u?.email) {
         await sendMail({
           to: u.email,
-          subject: `Deposit Confirmed: ${amount} ${symbol}`,
+          subject: `Your ${symbol} Deposit Alert`,
           html: `<p>Hello ${u.name || ''},</p>
-<p>Your account has been funded with <b>${amount} ${symbol}</b>.</p>
-<p>This deposit has been approved and added to your balance.</p>
+<p>Your account was funded with <b>${amount} ${symbol}</b>.</p>
 <p>— QFS Support</p>`,
         });
       }
-    } catch (e) {
-      console.error('[mailer] fund notice failed:', e.message);
-    }
+    } catch (e) { console.error('[mailer] fund notice failed:', e.message); }
 
-    console.log(`[admin] ✅ Deposit recorded for user ${id}`);
-    res.json({ ok: true, deposit: result });
-  } catch (e) {
-    next(e);
-  }
+    res.json({ ok: true });
+  } catch (e) { next(e); }
 });
-
 
 router.post('/users/:id/wipe-balances', async (req, res, next) => {
   try {
