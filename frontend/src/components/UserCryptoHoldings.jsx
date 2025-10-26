@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useAuth } from "../store/auth"
 import { RefreshCcw, TrendingUp, TrendingDown } from "lucide-react"
+import api from "../lib/api"   // ✅ added this line
 
 function formatCurrency(n) {
   if (n == null || Number.isNaN(n)) return "—"
@@ -128,68 +129,54 @@ export default function UserCryptoHoldings() {
   const [err, setErr] = useState(null)
   const [coins, setCoins] = useState([])
 
- // 1) Expand the symbols list (order preserved)
-const symbols = useMemo(
-  () => [
-    "BTC", "ETH", "USDT", "USDC",
-    "XLM", "XRP", "LTC", "DOGE", "BNB", "SHIB",
-    "TRX", "ADA", "SOL", "MATIC", "ALGO",
-    "TRUMP", "PEPE"
-  ],
-  []
-)
-
+  const symbols = useMemo(
+    () => [
+      "BTC", "ETH", "USDT", "USDC",
+      "XLM", "XRP", "LTC", "DOGE", "BNB", "SHIB",
+      "TRX", "ADA", "SOL", "MATIC", "ALGO",
+      "TRUMP", "PEPE"
+    ],
+    []
+  )
 
   async function fetchHoldingsAndPrices() {
     try {
       setErr(null)
       setLoading(true)
 
-      // 1) Get user holdings
-      const hRes = await fetch("/api/me/holdings", {
-        headers: {
-          "Content-Type": "application/json",
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
-        },
-        credentials: "include"
+      // ✅ 1) Get user holdings (use axios instance)
+      const { data: holdings } = await api.get("/me/holdings", {
+        headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
       })
-      if (!hRes.ok) throw new Error(`Holdings error: ${hRes.status}`)
-      const holdings = await hRes.json() // { BTC: number, ETH: number, ... }
 
-      // 2) Get live prices for the same symbols
+      // ✅ 2) Get live prices for the same symbols (use axios instance)
       const q = symbols.join(",")
-      const pRes = await fetch(`/api/market/prices?symbols=${encodeURIComponent(q)}`, {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      if (!pRes.ok) throw new Error(`Prices error: ${pRes.status}`)
-      const prices = await pRes.json() // { BTC: { priceUsd, change24h }, ... }
+      const { data: prices } = await api.get(`/market/prices?symbols=${encodeURIComponent(q)}`)
 
-      // Build rows in the specified order
+      // Build rows
       const rows = symbols.map((sym) => {
         const amount = Number(holdings?.[sym] ?? 0)
         const priceUsd = Number(prices?.[sym]?.priceUsd ?? 0)
         const change24h = Number(prices?.[sym]?.change24h ?? 0)
-       const nameMap = {
-            BTC: "Bitcoin",
-            ETH: "Ethereum",
-            USDT: "Tether",
-            USDC: "USD Coin",
-            XLM: "Stellar",
-            XRP: "XRP",
-            LTC: "Litecoin",
-            DOGE: "Dogecoin",
-            BNB: "BNB",
-            SHIB: "Shiba Inu",
-            TRX: "TRON",
-            ADA: "Cardano",
-            SOL: "Solana",
-            MATIC: "Polygon",
-            ALGO: "Algorand",
-            TRUMP: "Official Trump",
-            PEPE: "Pepe"
-            }
+        const nameMap = {
+          BTC: "Bitcoin",
+          ETH: "Ethereum",
+          USDT: "Tether",
+          USDC: "USD Coin",
+          XLM: "Stellar",
+          XRP: "XRP",
+          LTC: "Litecoin",
+          DOGE: "Dogecoin",
+          BNB: "BNB",
+          SHIB: "Shiba Inu",
+          TRX: "TRON",
+          ADA: "Cardano",
+          SOL: "Solana",
+          MATIC: "Polygon",
+          ALGO: "Algorand",
+          TRUMP: "Official Trump",
+          PEPE: "Pepe"
+        }
         return {
           symbol: sym,
           name: nameMap[sym] || sym,
@@ -209,14 +196,12 @@ const symbols = useMemo(
 
   useEffect(() => {
     fetchHoldingsAndPrices()
-    const id = setInterval(fetchHoldingsAndPrices, 60_000) // auto refresh every 60s
+    const id = setInterval(fetchHoldingsAndPrices, 60_000)
     return () => clearInterval(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authToken])
 
   return (
     <section className="space-y-3">
-      {/* Header row */}
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-gray-900 dark:text-white">Your Crypto Coins</h2>
         <button
@@ -228,7 +213,6 @@ const symbols = useMemo(
         </button>
       </div>
 
-      {/* List — one full-width column per coin on mobile; tasteful grid on larger screens */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {loading
           ? symbols.map((s) => <CoinRow key={s} loading meta={{}} />)
