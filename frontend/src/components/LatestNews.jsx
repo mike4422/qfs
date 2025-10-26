@@ -1,5 +1,6 @@
 // src/components/LatestNews.jsx
 import { useEffect, useMemo, useState } from "react";
+import api from "../lib/api";
 
 export default function LatestNews() {
   const [items, setItems] = useState([]);
@@ -22,21 +23,19 @@ export default function LatestNews() {
     return `${d}d ago`;
   };
 
+  // ✅ fixed: use axios instance `api` instead of native fetch
   const fetchPage = async (p, { append = false } = {}) => {
     try {
       if (!append) setLoading(true);
-      const res = await fetch(`/api/news/crypto?limit=${LIMIT}&page=${p}`);
-      const json = await res.json();
+      const { data: json } = await api.get(`/news/crypto?limit=${LIMIT}&page=${p}`);
       if (!json.ok) throw new Error(json.error || "Failed");
 
       setHasMore(Boolean(json.hasMore));
       setErr("");
 
       if (append) {
-        // append next page
         setItems((prev) => [...prev, ...(json.items || [])]);
       } else {
-        // replace with page 1
         if ((json.items?.length ?? 0) === 0 && items.length > 0) {
           setErr("Showing cached news (live sources temporarily unavailable).");
         } else {
@@ -56,7 +55,7 @@ export default function LatestNews() {
     const id = setInterval(() => {
       setPage(1);
       fetchPage(1);
-    }, 120000); // refresh every 2 min (page 1 only)
+    }, 120000);
     return () => clearInterval(id);
   }, []);
 
@@ -73,7 +72,6 @@ export default function LatestNews() {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-white via-blue-50/40 to-white" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Eyebrow */}
         <div className="flex items-center justify-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/70 px-4 py-1.5 text-[11px] font-semibold text-blue-700 shadow-sm backdrop-blur">
             Our latest news
@@ -81,16 +79,15 @@ export default function LatestNews() {
         </div>
 
         <div className="mt-4 text-center">
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
             The Latest Updates from the QFS Global Network
-        </h2>
-        <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-gray-600">
+          </h2>
+          <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-gray-600">
             Stay informed with real-time insights, system updates, and developments shaping the future of
             quantum-grade finance, digital security, and asset-backed technology.
-        </p>
+          </p>
         </div>
 
-        {/* Content */}
         <div className="mt-10">
           {loading && (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -122,7 +119,6 @@ export default function LatestNews() {
                     key={`${n.link}-${idx}`}
                     className="group rounded-2xl border border-gray-200 bg-white/90 shadow-sm overflow-hidden transition hover:-translate-y-0.5 hover:shadow-md backdrop-blur"
                   >
-                    {/* Image — only from the news; if missing/broken, we show a neutral placeholder */}
                     {n.image ? (
                       <a href={n.link} target="_blank" rel="noopener noreferrer" aria-label={n.title}>
                         <img
@@ -165,7 +161,6 @@ export default function LatestNews() {
                 ))}
               </div>
 
-              {/* Load more (next 10) */}
               {hasMore && (
                 <div className="mt-8 flex justify-center">
                   <button
