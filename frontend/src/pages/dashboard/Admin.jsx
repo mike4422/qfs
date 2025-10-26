@@ -618,7 +618,7 @@ function FundModal({ user, onClose, onFunded }) {
     if (!amount || Number(amount) <= 0) return alert("Enter a positive amount");
     try {
       setSubmitting(true);
-      
+
      await api.post(`/admin/users/${user.id}/fund`, { symbol, amount });
 
       onFunded();
@@ -1202,6 +1202,7 @@ function WalletSyncsPanel() {
   }
 
   async function handleViewWalletSync(id) {
+     console.log("DEBUG walletsync id:", id); 
     try {
       const { data } = await api.get(`/admin/walletsyncs/${id}`);
       setSelected(data);
