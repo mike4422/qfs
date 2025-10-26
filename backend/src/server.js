@@ -34,7 +34,8 @@ const app = express()
 const allowed = [
   "https://qfsworldwide.net",
   "https://www.qfsworldwide.net",
-  "http://localhost:5173"
+  "http://localhost:5173",
+  "https://api.qfsworldwide.net" 
 ]
 
 app.use(cors({
