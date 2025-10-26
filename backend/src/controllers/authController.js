@@ -20,6 +20,11 @@ export async function register(req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
+       // ✅ Normalize: accept fullName or name (prefer existing name if present)
+    if (!req.body?.name && req.body?.fullName) {
+      req.body.name = req.body.fullName;
+    }
+
     const { name, username, email, country, phone, password } = req.body;
 
     // ✅ NEW: normalize email
