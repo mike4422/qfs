@@ -261,9 +261,10 @@ function UsersPanel() {
   });
 
   async function handleDeleteUser(u) {
-    if (!confirm(`Delete user ${u.email}? This action cannot be undone.`)) return;
+    if (!confirm(`Delete user ${u.email}? This action cannot be undone.`))
+      return;
     try {
-      await api.delete(`/admin/users/${u.id}`);
+      await api.delete(`/admin/users/${u.id}`, { method: "DELETE" });
       setRows((prev) => prev.filter((x) => x.id !== u.id));
     } catch (e) {
       console.error(e);
@@ -274,9 +275,9 @@ function UsersPanel() {
   async function handleWipeBalance(u) {
     if (!confirm(`Set all balances to 0 for ${u.email}?`)) return;
     try {
-      await api.post(`/admin/users/${u.id}/wipe-balances`);
-      const { data } = await api.get("/admin/users");
-      setRows(data?.users || []);
+        await api.post(`/admin/users/${u.id}/wipe-balances`);
+     const { data } = await api.get("/admin/users");
+     setRows(data?.users || []);
     } catch (e) {
       console.error(e);
       alert("Failed to wipe balances");
@@ -288,7 +289,9 @@ function UsersPanel() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold">All Users</h2>
-          <p className="text-sm text-gray-600">View, edit, fund, or delete any user</p>
+          <p className="text-sm text-gray-600">
+            View, edit, fund, or delete any user
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -323,9 +326,9 @@ function UsersPanel() {
               <th className="py-2 pr-4">ID</th>
               <th className="py-2 pr-4">User</th>
               <th className="py-2 pr-4">Email</th>
-              <th className="py-2 pr-4">Country</th>
-              <th className="py-2 pr-4">City</th>
-              <th className="py-2 pr-4">Phone</th>
+               <th className="py-2 pr-4">Country</th>
+               <th className="py-2 pr-4">City</th>
+               <th className="py-2 pr-4">Phone</th>
               <th className="py-2 pr-4">KYC</th>
               <th className="py-2 pr-4">Balances</th>
               <th className="py-2 pr-4">Created</th>
@@ -349,17 +352,16 @@ function UsersPanel() {
                 >
                   <td className="py-3 pr-4">{u.id}</td>
                   <td className="py-3 pr-4">
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {displayName(u)}
-                    </div>
+                    <div className="font-medium text-gray-900 dark:text-white">{displayName(u)}</div>
+
                     <div className="text-xs text-gray-500">
                       @{u.username || "n/a"}
                     </div>
                   </td>
                   <td className="py-3 pr-4">{u.email}</td>
-                  <td className="py-3 pr-4">{u.country || "—"}</td>
-                  <td className="py-3 pr-4">{u.city || "—"}</td>
-                  <td className="py-3 pr-4">{u.phone || "—"}</td>
+                    <td className="py-3 pr-4">{u.country || "—"}</td>
+                    <td className="py-3 pr-4">{u.city || "—"}</td>
+                    <td className="py-3 pr-4">{u.phone || "—"}</td>
                   <td className="py-3 pr-4">
                     <span
                       className={classNames(
@@ -425,7 +427,7 @@ function UsersPanel() {
           user={editUser}
           onClose={() => setEditUser(null)}
           onSaved={async () => {
-            const { data } = await api.get("/admin/users");
+           const { data } = await api.get("/admin/users");
             setRows(data?.users || []);
             setEditUser(null);
           }}
@@ -438,7 +440,7 @@ function UsersPanel() {
           onClose={() => setFundUser(null)}
           onFunded={async () => {
             const { data } = await api.get("/admin/users");
-            setRows(data?.users || []);
+           setRows(data?.users || []);
             setFundUser(null);
           }}
         />
@@ -446,7 +448,6 @@ function UsersPanel() {
     </div>
   );
 }
-
 
 function EditUserDrawer({ user, onClose, onSaved }) {
   const [form, setForm] = useState({
@@ -464,7 +465,7 @@ function EditUserDrawer({ user, onClose, onSaved }) {
   async function save() {
     try {
       setSaving(true);
-      await api(`/api/admin/users/${user.id}`, {
+      await api.put(`/admin/users/${user.id}`, {
         method: "PUT",
         body: JSON.stringify(form),
       });
