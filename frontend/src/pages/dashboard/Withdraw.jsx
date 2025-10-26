@@ -6,6 +6,7 @@ import {
   Check, Copy, RefreshCcw, ShieldAlert, ArrowRight, LockKeyhole, Loader2
 } from "lucide-react"
 import { useAuth } from "../../store/auth"
+import api from "../../lib/api" 
 
 // --- helpers / constants
 const cls = (...a) => a.filter(Boolean).join(" ")
@@ -142,18 +143,9 @@ useEffect(() => {
     setLoadingHoldings(true)
     setHoldingsErr(null)
     try {
-      const res = await fetch("/api/me/holdings", {
-        credentials: "include",
-        headers: {
-          "Accept": "application/json",
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-        }
-      })
-      if (!res.ok) {
-        const j = await res.json().catch(() => ({}))
-        throw new Error(j.message || `Failed (${res.status})`)
-      }
-      const j = await res.json()
+      const { data: j } = await api.get("/me/holdings", {
+       headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
+     })
 
       // 🔧 Normalize to [{ symbol, amount }] where amount = available
       let arr = []
@@ -202,26 +194,18 @@ useEffect(() => {
       setSubmitErr(null)
 
       // Adjust backend path once you implement it
-      const res = await fetch("/api/wallet/withdraw", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-        },
-        body: JSON.stringify({
-          symbol: selected.symbol,
-          network,
-          address: address.trim(),
-          memo: memo.trim() || null,
-          amount: amtNum,
-          twoFA: twoFA.trim() || null,
-        })
-      })
-      if (!res.ok) {
-        const j = await res.json().catch(() => ({}))
-        throw new Error(j.message || `Request failed (${res.status})`)
-      }
+       await api.post(
+      "/wallet/withdraw",
+      {
+        symbol: selected.symbol,
+        network,
+        address: address.trim(),
+        memo: memo.trim() || null,
+        amount: amtNum,
+        twoFA: twoFA.trim() || null,
+      },
+      { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }
+    )
 
       // success → go to transactions
       navigate("/dashboard/transactions")
