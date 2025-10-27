@@ -190,7 +190,7 @@ router.get("/summary", auth, async (req, res) => {
     const kycMap = {
       NOT_VERIFIED: "not_verified",
       PENDING: "pending",
-       UNDER_REVIEW: "under_review", 
+      UNDER_REVIEW: "under_review", 
       APPROVED: "approved",
       REJECTED: "not_verified",
     }

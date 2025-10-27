@@ -40,6 +40,12 @@ function KycBadge({ status }) {
         "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
       Icon: Clock
     },
+     under_review: {
+       text: "Under Review",
+      className:
+         "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+       Icon: ShieldCheck
+     },
     approved: {
       text: "Approved",
       className:
@@ -423,8 +429,10 @@ setStableTotalAssetUSD(prev => {
                   : summary.kycStatus === "not_verified"
                     ? "Complete verification to unlock full features."
                     : summary.kycStatus === "pending"
-                      ? "Your documents are under review."
-                      : "Your identity is verified."}
+                    ? "Your submission is pending review."
+                    : summary.kycStatus === "under_review"
+                    ? "Your documents are under review."
+                    : "Your identity is verified."}
               </p>
             </div>
 
