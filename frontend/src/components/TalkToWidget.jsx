@@ -5,10 +5,10 @@ export default function TalkToWidget() {
     // Prevent duplicate injection
     if (document.getElementById("tawkto-script")) return;
 
+    // ---- 1) Inject the official Tawk script (unchanged) ----
     const s1 = document.createElement("script");
     s1.id = "tawkto-script";
     s1.async = true;
-    // ✅ Your new Tawk.to link
     s1.src = "https://embed.tawk.to/68fee2d77190d319491693f9/1j8hqc6v0";
     s1.charset = "UTF-8";
     s1.setAttribute("crossorigin", "*");
@@ -16,68 +16,73 @@ export default function TalkToWidget() {
     const s0 = document.getElementsByTagName("script")[0];
     s0.parentNode.insertBefore(s1, s0);
 
-    // 🟢 Ensure Tawk API exists before script loads
-    window.Tawk_API = window.Tawk_API || {};
-    window.Tawk_LoadStart = new Date();
+    // ---- 2) Robust re-positioner (works even if Tawk re-renders) ----
+    const MOBILE_BOTTOM_OFFSET_PX = 76;   // move up above your MobileNavDock
+    const MOBILE_RIGHT_OFFSET_PX  = 16;   // keep a little breathing room from edge
 
-    // 🟢 CSS override to lift widget above MobileNavDock on mobile
-    const style = document.createElement("style");
-    style.id = "tawkto-mobile-offset";
-    style.textContent = `
-      @media (max-width: 767px){
-        iframe[src*="tawk.to"] { bottom: 80px !important; }
-        #tawkchat-container { bottom: 80px !important; }
-        [id^="tawk-"], [id^="tawk_"] { bottom: 80px !important; }
+    const isMobile = () => window.matchMedia("(max-width: 768px)").matches;
+
+    // climbs up from the iframe to find the fixed container Tawk uses
+    const findFixedContainer = (el) => {
+      let node = el?.parentElement || null;
+      while (node && node !== document.body) {
+        const cs = getComputedStyle(node);
+        if (cs.position === "fixed") return node;
+        node = node.parentElement;
       }
-    `;
-    document.head.appendChild(style);
-
-    // 🟢 JS fallback to enforce offset dynamically
-    const OFFSET_PX = 80;
-    const reposition = () => {
-      if (window.innerWidth >= 768) return;
-      const frames = Array.from(document.querySelectorAll('iframe[src*="tawk.to"]'));
-      frames.forEach((frame) => {
-        try {
-          frame.style.bottom = OFFSET_PX + "px";
-          let p = frame.parentElement;
-          let hops = 0;
-          while (p && hops < 4) {
-            const cs = window.getComputedStyle(p);
-            if (cs.position === "fixed" || cs.position === "sticky") {
-              p.style.bottom = OFFSET_PX + "px";
-            }
-            p = p.parentElement;
-            hops++;
-          }
-        } catch {}
-      });
-
-      const containers = document.querySelectorAll('#tawkchat-container, [id^="tawk-"], [id^="tawk_"]');
-      containers.forEach((el) => {
-        try { el.style.bottom = OFFSET_PX + "px"; } catch {}
-      });
+      return null;
     };
 
-    if (window.Tawk_API) {
-      window.Tawk_API.onLoad = function () {
-        reposition();
-      };
-    }
+    const nudge = () => {
+      try {
+        const iframes = Array.from(
+          document.querySelectorAll('iframe[src*="tawk.to"], iframe[id*="tawk"], iframe[name*="tawk"]')
+        );
+        if (!iframes.length) return;
 
-    const observer = new MutationObserver(reposition);
-    observer.observe(document.body, { childList: true, subtree: true });
-    window.addEventListener("resize", reposition);
-    const tick = setInterval(reposition, 1200);
+        for (const iframe of iframes) {
+          const fixedBox = findFixedContainer(iframe) || iframe; // fallback to the iframe itself
+          if (!fixedBox) continue;
+
+          const style = fixedBox.style;
+
+          // Always keep it clickable above other UI
+          style.setProperty("z-index", "2147483000", "important");
+          style.setProperty("pointer-events", "auto", "important");
+
+          if (isMobile()) {
+            style.setProperty("bottom", `${MOBILE_BOTTOM_OFFSET_PX}px`, "important");
+            style.setProperty("right", `${MOBILE_RIGHT_OFFSET_PX}px`, "important");
+            style.setProperty("left", "auto", "important"); // avoid left-corner layouts overlapping
+          } else {
+            // desktop: leave Tawk default bottom-right, just ensure we don’t sit under anything
+            style.setProperty("bottom", "24px", "important");
+            style.setProperty("right", "24px", "important");
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+
+    // keep enforcing (Tawk sometimes re-injects)
+    const interval = setInterval(nudge, 800);
+
+    // also react immediately to new DOM nodes
+    const mo = new MutationObserver(nudge);
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+
+    // first run + on resize
+    nudge();
+    const onResize = () => nudge();
+    window.addEventListener("resize", onResize);
 
     return () => {
+      window.removeEventListener("resize", onResize);
+      mo.disconnect();
+      clearInterval(interval);
       const existing = document.getElementById("tawkto-script");
       if (existing) existing.remove();
-      observer.disconnect();
-      clearInterval(tick);
-      window.removeEventListener("resize", reposition);
-      const injected = document.getElementById("tawkto-mobile-offset");
-      if (injected) injected.remove();
     };
   }, []);
 
