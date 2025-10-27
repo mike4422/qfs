@@ -86,21 +86,21 @@ if (ids.length > 0) {
       const sym = (h.symbol || "").toUpperCase()
       const id = cgIdMap[sym]
       const px = id && priceUSD[id] ? Number(priceUSD[id].usd || 0) : 0
-      const available = Number(h.amount) - Number(h.locked || 0)
+      const available = Math.max(0, Number(h.amount) - Number(h.locked || 0))
       if (!isFinite(available) || !isFinite(px)) return acc
       return acc + (available * px)
     }, 0)
 
+// Only use holdings to compute total (no TX fallback)
 let total = holdingsTotalUSD
-if (!isFinite(total) || total === 0) {
-  total = (user.txs || []).reduce((acc, t) => {
-    const amt = parseFloat(String(t.amount || "0").replace(/[^0-9.\-]/g, "")) || 0
-    if (t.type === "DEPOSIT") return acc + amt
-    if (t.type === "WITHDRAWAL") return acc - amt
-    return acc
-  }, 0)
+
+// If there are no holdings, force 0
+if (!Array.isArray(holdings) || holdings.length === 0) {
+  total = 0
 }
+
 const safeTotal = Number.isFinite(total) && !Number.isNaN(total) ? total : 0
+
 
 
     const walletSynced = Boolean(user.wallet) || (Array.isArray(user.wallets) && user.wallets.length > 0)
