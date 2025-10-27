@@ -8,6 +8,10 @@ import bcrypt from "bcryptjs"
 const prisma = new PrismaClient()
 const router = Router()
 
+ // --- Simple in-memory cache for CoinGecko prices ---
+ // We keep the last successful response and reuse it if fetching fails (so UI doesn't drop to $0).
+ let PRICE_CACHE = { data: {}, ts: 0, ids: [] } // ids = last ids array we priced
+
 function getUserId(req) {
   return req?.user?.id ?? req?.user?.userId ?? req?.user?.sub
 }
@@ -26,104 +30,6 @@ async function safeFetchJSON(url, opts = {}, timeoutMs = 7000) {
   }
 }
 
-// GET /api/me/summary
-// router.get("/summary", auth, async (req, res) => {
-//   try {
-//     const userId = getUserId(req)
-//     if (!userId) return res.status(401).json({ message: "Unauthorized" })
-
-//     const user = await prisma.user.findUnique({
-//       where: { id: Number(userId) },
-//       select: {
-//         id: true,
-//         name: true,
-//         kycStatus: true,
-//         kycSubmittedAt: true,
-//         wallet: true,
-//         wallets: true,
-//         // txs: {
-//         //   where: { status: "CONFIRMED" },
-//         //   select: { type: true, amount: true }
-//         // }
-//       }
-//     })
-
-//     if (!user) return res.status(404).json({ message: "User not found" })
-
-//     const holdings = await prisma.holding.findMany({
-//       where: { userId: Number(userId) },
-//       select: { symbol: true, amount: true, locked: true }
-//     })
-
-//     const cgIdMap = {
-//       BTC: "bitcoin", ETH: "ethereum", USDT: "tether", USDC: "usd-coin",
-//       XRP: "ripple", XLM: "stellar", LTC: "litecoin", DOGE: "dogecoin",
-//       SHIB: "shiba-inu", TRX: "tron", ADA: "cardano", SOL: "solana",
-//       MATIC: "polygon", BNB: "binancecoin", ALGO: "algorand",
-//       TRUMP: "maga", PEPE: "pepe"
-//     }
-
-//     const ids = [...new Set(holdings.map(h => cgIdMap[h.symbol?.toUpperCase?.()]).filter(Boolean))]
-
-//     let priceUSD = {}
-//     if (ids.length > 0) {
-//       const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids.join(","))}&vs_currencies=usd`
-//       const resp = await fetch(url, { headers: { "accept": "application/json" } })
-//       if (resp.ok) priceUSD = await resp.json()
-//     }
-
-//     const holdingsTotalUSD = holdings.reduce((acc, h) => {
-//       const sym = (h.symbol || "").toUpperCase()
-//       const id = cgIdMap[sym]
-//       const px = id && priceUSD[id] ? Number(priceUSD[id].usd || 0) : 0
-//       const available = Number(h.amount) - Number(h.locked || 0)
-//       if (!isFinite(available) || !isFinite(px)) return acc
-//       return acc + (available * px)
-//     }, 0)
-
-//     let total = holdingsTotalUSD
-//     if (!isFinite(total) || total === 0) {
-//       total = (user.txs || []).reduce((acc, t) => {
-//         const amt = parseFloat(String(t.amount || "0").replace(/[^0-9.\-]/g, "")) || 0
-//         if (t.type === "DEPOSIT") return acc + amt
-//         if (t.type === "WITHDRAWAL") return acc - amt
-//         return acc
-//       }, 0)
-//     }
-    
-
-//     const walletSynced = Boolean(user.wallet) || (Array.isArray(user.wallets) && user.wallets.length > 0)
-
-//     const kycMap = {
-//       NOT_VERIFIED: "not_verified",
-//       PENDING: "pending",
-//       APPROVED: "approved",
-//       REJECTED: "not_verified",
-//     }
-//     let kycStatus = kycMap[user.kycStatus] ?? "not_verified"
-//     if (kycStatus === "pending" && !user.kycSubmittedAt) kycStatus = "not_verified"
-
-//     // ✅ Fetch the latest wallet sync status
-//     const lastWalletSync = await prisma.walletSync.findFirst({
-//       where: { userId: Number(userId) },
-//       orderBy: { id: "desc" },
-//       select: { status: true },
-//     })
-
-//     // ✅ Return everything in one response
-//     return res.json({
-//       totalAssetUSD: Number(total.toFixed(2)),
-//       walletSynced,
-//       walletSyncStatus: lastWalletSync?.status || "NOT_SYNCED",
-//       kycStatus,
-//       name: user.name
-//     })
-
-//   } catch (err) {
-//     console.error("GET /api/me/summary error:", err)
-//     return res.status(500).json({ message: "Server error" })
-//   }
-// })
 
 // GET /api/me/summary
 router.get("/summary", auth, async (req, res) => {
@@ -164,11 +70,43 @@ router.get("/summary", auth, async (req, res) => {
       holdings.map(h => cgIdMap[h.symbol?.toUpperCase?.()]).filter(Boolean)
     )]
 
-    let priceUSD = {}
+   let priceUSD = {}
     if (ids.length > 0) {
-      const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids.join(","))}&vs_currencies=usd`
-      const resp = await fetch(url, { headers: { "accept": "application/json" } })
-      if (resp.ok) priceUSD = await resp.json()
+      const now = Date.now()
+      const headers = { accept: "application/json" }
+      if (process.env.COINGECKO_API_KEY) {
+        headers["x-cg-demo-api-key"] = process.env.COINGECKO_API_KEY
+      }
+
+      const key = ids.join(",")
+      let fetched = false
+      try {
+        const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(key)}&vs_currencies=usd`
+        const resp = await fetch(url, { headers })
+        if (resp.ok) {
+          const j = await resp.json().catch(() => ({}))
+          if (!j?.status) {
+            priceUSD = j || {}
+            PRICE_CACHE = { data: priceUSD, ts: now, ids } // ✅ store last good prices
+            fetched = true
+          }
+        }
+      } catch {
+        // ignore fetch errors; we'll fall back to cache below
+      }
+
+      // Check if cache is still fresh (≤ 5 minutes)
+       const cacheFresh = now - (PRICE_CACHE.ts || 0) < 300_000;
+
+      // ❗ If fetching failed or we were rate-limited, reuse cached prices (valid ≤ 5 minutes).
+      if (!fetched && cacheFresh && PRICE_CACHE.data && Object.keys(PRICE_CACHE.data).length) {
+        // Filter cached prices to just the ids we need now.
+        priceUSD = ids.reduce((acc, id) => {
+          if (PRICE_CACHE.data[id]) acc[id] = PRICE_CACHE.data[id]
+          return acc
+        }, {})
+      }
+      // If there is still no price for a symbol, it will count as 0 for that symbol only.
     }
 
     const holdingsTotalUSD = holdings.reduce((acc, h) => {
