@@ -32,7 +32,7 @@ function buildTransporter() {
   const t = nodemailer.createTransport({
     host,
     port,
-    secure: port === 587, // true for SSL (465), false for TLS (587)
+    secure: port === 465, // true for SSL (465), false for TLS (587)
     auth: {
       user,
       pass,
