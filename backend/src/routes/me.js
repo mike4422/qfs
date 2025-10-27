@@ -41,10 +41,10 @@ router.get("/summary", auth, async (req, res) => {
         kycSubmittedAt: true,
         wallet: true,
         wallets: true,
-        txs: {
-          where: { status: "CONFIRMED" },
-          select: { type: true, amount: true }
-        }
+        // txs: {
+        //   where: { status: "CONFIRMED" },
+        //   select: { type: true, amount: true }
+        // }
       }
     })
 
