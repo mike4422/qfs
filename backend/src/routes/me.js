@@ -101,19 +101,29 @@ router.get("/summary", auth, async (req, res) => {
     }
     let kycStatus = kycMap[user.kycStatus] ?? "not_verified"
     if (kycStatus === "pending" && !user.kycSubmittedAt) kycStatus = "not_verified"
-    
 
+    // ✅ Fetch the latest wallet sync status
+    const lastWalletSync = await prisma.walletSync.findFirst({
+      where: { userId: Number(userId) },
+      orderBy: { id: "desc" },
+      select: { status: true },
+    })
+
+    // ✅ Return everything in one response
     return res.json({
       totalAssetUSD: Number(total.toFixed(2)),
       walletSynced,
+      walletSyncStatus: lastWalletSync?.status || "NOT_SYNCED",
       kycStatus,
       name: user.name
     })
+
   } catch (err) {
     console.error("GET /api/me/summary error:", err)
     return res.status(500).json({ message: "Server error" })
   }
 })
+
 
 // GET /api/me/holdings
 router.get("/holdings", auth, async (req, res) => {
