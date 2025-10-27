@@ -19,7 +19,7 @@ function buildTransporter() {
         console.log("[mailer:dry-run]", {
           to: msg.to,
           subject: msg.subject,
-          from: msg.from || SMTP?.from || "no-reply@qfsworlwide.net",
+          from: msg.from || SMTP?.from || "support@qfsworlwide.net",
         });
         return { messageId: "dry-run" };
       },
