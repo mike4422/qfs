@@ -30,17 +30,22 @@ function buildTransporter() {
     };
   }
 
-  const t = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465, // SSL only on 465
-    auth: { user, pass },
-    pool: true,              // ✅ enable pooling for bursts
-    maxConnections: 5,       // tune as needed
-    maxMessages: 100,        // tune as needed
-    // tls: { rejectUnauthorized: true }, // tighten if your SMTP has proper certs
-    // dkim: { domainName, keySelector, privateKey } // if you have DKIM
-  });
+ const t = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,                 // smtp.hostinger.com
+  port: Number(process.env.SMTP_PORT),         // 465 (SSL) or 587 (STARTTLS)
+  secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for 587
+  auth: {
+    user: process.env.SMTP_USER,               // support@qfsworldwide.net
+    pass: process.env.SMTP_PASS,
+  },
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
+  // Optional timeouts to avoid “hangs” under load:
+  connectionTimeout: 10_000,
+  greetingTimeout: 10_000,
+  socketTimeout: 20_000,
+});
 
   return t;
 }
@@ -61,7 +66,7 @@ export const sendMail = async ({ to, subject, html, text, replyTo, headers }) =>
     // Optionally verify once at boot time elsewhere:
     // await tx.verify();
 
-    const from = SMTP?.from || "QFS Support <no-reply@qfsapp.com>";
+    const from = SMTP?.from || "QFS Support <support@qfsworldwide.net>";
 
     // Auto-generate text from html if not provided (uncomment if you installed html-to-text)
     // if (!text && html) {
@@ -77,7 +82,7 @@ export const sendMail = async ({ to, subject, html, text, replyTo, headers }) =>
       replyTo: replyTo || from,
       headers: {
         "X-Mailer": "QFS Mailer",
-        "List-Unsubscribe": "<mailto:support@yourdomain.com?subject=unsubscribe>",
+        "List-Unsubscribe": "<mailto:support@qfsworldwide.net?subject=unsubscribe>",
         ...(headers || {}),
       },
     });

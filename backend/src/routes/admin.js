@@ -644,7 +644,7 @@ console.log("[admin] walletsync status update", req.params.id, req.body.status);
     // ✅ Step 5: Send email only if transporter is set
     if (typeof transporter?.sendMail === "function" && record.user?.email) {
       await transporter.sendMail({
-        from: `"QFS System" <${process.env.ADMIN_EMAIL || "no-reply@qfs.com"}>`,
+        from: `"QFS System" <support@qfsworldwide.net>`,
         to: record.user.email,
         subject: `🔔 ${subjectMap[status] || "Wallet Sync Update"}`,
         html,
