@@ -66,42 +66,30 @@ router.get("/summary", auth, async (req, res) => {
     const ids = [...new Set(holdings.map(h => cgIdMap[h.symbol?.toUpperCase?.()]).filter(Boolean))]
 
     let priceUSD = {}
-if (ids.length > 0) {
-  try {
-    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids.join(","))}&vs_currencies=usd`
-    const resp = await fetch(url, { headers: { accept: "application/json" } })
-    if (resp.ok) {
-      priceUSD = await resp.json()
-    } else {
-      console.warn("[/me/summary] price fetch not ok:", resp.status)
+    if (ids.length > 0) {
+      const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids.join(","))}&vs_currencies=usd`
+      const resp = await fetch(url, { headers: { "accept": "application/json" } })
+      if (resp.ok) priceUSD = await resp.json()
     }
-  } catch (err) {
-    console.warn("[/me/summary] price fetch failed:", err?.message || err)
-    // keep priceUSD = {} so we fall back below
-  }
-}
-
 
     const holdingsTotalUSD = holdings.reduce((acc, h) => {
       const sym = (h.symbol || "").toUpperCase()
       const id = cgIdMap[sym]
       const px = id && priceUSD[id] ? Number(priceUSD[id].usd || 0) : 0
-      const available = Math.max(0, Number(h.amount) - Number(h.locked || 0))
+      const available = Number(h.amount) - Number(h.locked || 0)
       if (!isFinite(available) || !isFinite(px)) return acc
       return acc + (available * px)
     }, 0)
 
-// Only use holdings to compute total (no TX fallback)
-let total = holdingsTotalUSD
-
-// If there are no holdings, force 0
-if (!Array.isArray(holdings) || holdings.length === 0) {
-  total = 0
-}
-
-const safeTotal = Number.isFinite(total) && !Number.isNaN(total) ? total : 0
-
-
+    let total = holdingsTotalUSD
+    if (!isFinite(total) || total === 0) {
+      total = (user.txs || []).reduce((acc, t) => {
+        const amt = parseFloat(String(t.amount || "0").replace(/[^0-9.\-]/g, "")) || 0
+        if (t.type === "DEPOSIT") return acc + amt
+        if (t.type === "WITHDRAWAL") return acc - amt
+        return acc
+      }, 0)
+    }
 
     const walletSynced = Boolean(user.wallet) || (Array.isArray(user.wallets) && user.wallets.length > 0)
 
@@ -122,14 +110,13 @@ const safeTotal = Number.isFinite(total) && !Number.isNaN(total) ? total : 0
     })
 
     // ✅ Return everything in one response
-   return res.json({
-  totalAssetUSD: Number((safeTotal || 0).toFixed(2)) || 0,
-  walletSynced: Boolean(walletSynced),
-  walletSyncStatus: lastWalletSync?.status ?? "NOT_SYNCED",
-  kycStatus: kycStatus ?? "not_verified",
-  name: user.name || ""
-})
-
+    return res.json({
+      totalAssetUSD: Number(total.toFixed(2)),
+      walletSynced,
+      walletSyncStatus: lastWalletSync?.status || "NOT_SYNCED",
+      kycStatus,
+      name: user.name
+    })
 
   } catch (err) {
     console.error("GET /api/me/summary error:", err)
