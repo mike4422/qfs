@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar.jsx";
 import Footer from "./Footer.jsx";
+import TalkToWidget from "./components/TalkToWidget";
 
 export default function Layout() {
   return (
@@ -9,6 +10,7 @@ export default function Layout() {
       <main className="flex-1">
         <Outlet />
       </main>
+       <TalkToWidget />
       <Footer />
     </div>
   );
