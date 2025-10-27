@@ -8,7 +8,7 @@ import Register from "./pages/Register.jsx";
 import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import TalkToWidget from "./components/TalkToWidget";
+
 
 // ✅ Dashboard nested pages
 import Overview from "./pages/dashboard/Overview.jsx";
@@ -69,7 +69,6 @@ export default function App() {
           <Route path="secure401ira/confirmation" element={<Secure401IRAConfirmation />} />
           <Route path="secure401ira/history" element={<Secure401IRAHIstory />} />
         </Route>
-        <TalkToWidget />
 
         {/* Catch-all */}
         <Route path="*" element={<div>Not Found</div>} />
