@@ -158,6 +158,9 @@ useEffect(() => {
     walletSynced: null,
     kycStatus: "not_verified"
   })
+  // added
+  const [stableTotalAssetUSD, setStableTotalAssetUSD] = useState(null)
+
 
   const authToken = token || user?.token || localStorage.getItem("token")
 
@@ -175,6 +178,15 @@ useEffect(() => {
     walletSyncStatus: data?.walletSyncStatus || "NOT_SYNCED",
     kycStatus: data?.kycStatus || "not_verified",
     });
+
+    // added new
+    const next = typeof data?.totalAssetUSD === "number" ? data.totalAssetUSD : 0
+setStableTotalAssetUSD(prev => {
+  if (prev == null) return next            // first value wins (0 or >0)
+  if (next === 0 && prev > 0) return prev  // ignore transient zeros
+  return next
+})
+
 
     } catch (e) {
       setErr(e.message || "Unable to fetch summary")
@@ -378,7 +390,8 @@ useEffect(() => {
         <StatCard
           title="Total Asset"
           subtitle="Across all wallets"
-          value={loading ? null : formatCurrency(summary.totalAssetUSD)}
+          // added new
+          value={loading ? null : formatCurrency(stableTotalAssetUSD ?? 0)}
           icon={Wallet}
           loading={loading}
         />
