@@ -185,20 +185,26 @@ router.get("/file/:id", auth, async (req, res) => {
     const f = await prisma.kycFile.findUnique({ where: { id: fileId } })
     if (!f) return res.status(404).json({ message: "Not found" })
 
-    // Basic guard: only the owner or an admin should be able to read this
-    // (If you don’t have roles, this at least restricts to the owner)
-    const userId = Number(req?.user?.id ?? req?.user?.userId ?? req?.user?.sub)
-    const owner = await prisma.kycSubmission.findFirst({
-      where: { id: f.submissionId },
-      select: { userId: true }
-    })
-    if (!owner) return res.status(404).json({ message: "Not found" })
-    if (owner.userId !== userId) {
-      // optional: if you have roles, allow admins here
-      // e.g. if (req.user?.role !== 'ADMIN') ...
-      // For now, block non-owners.
-      return res.status(403).json({ message: "Forbidden" })
-    }
+    // Basic guard: allow owner OR admins to read this
+const userId = Number(req?.user?.id ?? req?.user?.userId ?? req?.user?.sub)
+const owner = await prisma.kycSubmission.findFirst({
+  where: { id: f.submissionId },
+  select: { userId: true }
+})
+if (!owner) return res.status(404).json({ message: "Not found" })
+
+// Check viewer role from DB to be safe
+const viewer = await prisma.user.findUnique({
+  where: { id: userId },
+  select: { role: true }
+})
+const isAdmin = viewer?.role === "ADMIN"
+const isOwner = owner.userId === userId
+
+if (!isOwner && !isAdmin) {
+  return res.status(403).json({ message: "Forbidden" })
+}
+
 
     // stream from disk
     try {
