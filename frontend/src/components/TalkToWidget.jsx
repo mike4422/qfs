@@ -1,56 +1,77 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
 
 export default function TalkToWidget() {
-  const location = useLocation();
-  const isAuthed = !!localStorage.getItem("token");
-  const isDashboard = location.pathname.startsWith("/dashboard");
-
   useEffect(() => {
-    const removeTawk = () => {
+    const SCRIPT_ID = "tawkto-script";
+    const INSTANCE_MARK = "__tawk_injected__";
+
+    const inject = () => {
+      if (document.getElementById(SCRIPT_ID)) return;
+      // init globals
+      window.Tawk_API = window.Tawk_API || {};
+      window.Tawk_LoadStart = new Date();
+
+      const s1 = document.createElement("script");
+      s1.id = SCRIPT_ID;
+      s1.async = true;
+      s1.src = "https://embed.tawk.to/68fee2d77190d319491693f9/1j8hqc6v0";
+      s1.charset = "UTF-8";
+      s1.setAttribute("crossorigin", "*");
+
+      const s0 = document.getElementsByTagName("script")[0];
+      s0?.parentNode?.insertBefore(s1, s0);
+      document.documentElement[INSTANCE_MARK] = true;
+    };
+
+    const remove = () => {
       try {
-        // remove script
-        const s = document.getElementById("tawkto-script");
+        const s = document.getElementById(SCRIPT_ID);
         if (s) s.remove();
-        // remove iframes/containers Tawk adds
         document
           .querySelectorAll(
             'iframe[src*="tawk.to"], #tawkchat-container, [id^="tawk-"], [id^="tawk_"]'
           )
           .forEach((n) => n.remove());
-        // clear globals to avoid reusing old instance
-        if (window.Tawk_API) delete window.Tawk_API;
-        if (window.Tawk_LoadStart) delete window.Tawk_LoadStart;
+        delete window.Tawk_API;
+        delete window.Tawk_LoadStart;
+        delete document.documentElement[INSTANCE_MARK];
       } catch {}
     };
 
-    // Hide on any authenticated route OR any /dashboard route
-    if (isAuthed || isDashboard) {
-      removeTawk();
-      return; // do not inject
-    }
+    const shouldShow = () => {
+      const token = localStorage.getItem("token");
+      const path = window.location.pathname || "/";
+      const authed = !!token;
+      const isDashboard = path.startsWith("/dashboard");
+      // Show only when NOT authenticated AND not on /dashboard
+      return !authed && !isDashboard;
+    };
 
-    // Already injected? do nothing
-    if (document.getElementById("tawkto-script")) return;
+    // initial decide
+    if (shouldShow()) inject();
+    else remove();
 
-    // Public pages only → inject
-    const s1 = document.createElement("script");
-    s1.id = "tawkto-script";
-    s1.async = true;
-    s1.src = "https://embed.tawk.to/68fee2d77190d319491693f9/1j8hqc6v0";
-    s1.charset = "UTF-8";
-    s1.setAttribute("crossorigin", "*");
+    // poll for SPA changes (path or auth changes)
+    let lastPath = window.location.pathname;
+    let lastToken = localStorage.getItem("token");
+    const tick = setInterval(() => {
+      const path = window.location.pathname;
+      const token = localStorage.getItem("token");
 
-    // init globals (as Tawk recommends)
-    window.Tawk_API = window.Tawk_API || {};
-    window.Tawk_LoadStart = new Date();
+      if (path !== lastPath || token !== lastToken) {
+        lastPath = path;
+        lastToken = token;
+        if (shouldShow()) inject();
+        else remove();
+      }
+    }, 700);
 
-    const s0 = document.getElementsByTagName("script")[0];
-    s0?.parentNode?.insertBefore(s1, s0);
-
-    // Cleanup when leaving public routes or unmounting
-    return () => removeTawk();
-  }, [isAuthed, isDashboard, location.pathname]);
+    // cleanup
+    return () => {
+      clearInterval(tick);
+      remove();
+    };
+  }, []);
 
   return null;
 }
