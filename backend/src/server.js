@@ -24,6 +24,7 @@ import adminRoutes from "./routes/admin.js";
 import { authMiddleware } from "./middleware/auth.js"; 
 import { requireAdmin } from './middleware/requireAdmin.js';
 import walletsyncRoutes from "./routes/walletsync.js";
+import debugSmtp from "./routes/debugSmtp.js";
 
 
 
@@ -71,6 +72,7 @@ app.use("/api/support", supportRouter)
 app.use(authMiddleware);
 app.use("/api/admin", authMiddleware, requireAdmin, adminRoutes);
 app.use("/api/walletsync", walletsyncRoutes);
+app.use("/api/debug/smtp", debugSmtp);
 
 
 app.use((err, req, res, next)=>{
