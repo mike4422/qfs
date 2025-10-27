@@ -1,7 +1,7 @@
 // src/pages/dashboard/Kyc.jsx
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useAuth } from "../../store/auth"
-import api from "../../utils/api"
+import api from "../../lib/api";
 import {
   IdCard, Globe, User, Calendar, Mail, Phone, MapPin, FileText,
   UploadCloud, CheckCircle2, ShieldCheck, AlertTriangle, Loader2
