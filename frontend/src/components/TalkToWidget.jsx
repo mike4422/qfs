@@ -44,7 +44,8 @@ export default function TalkToWidget() {
       const authed = !!token;
       const isDashboard = path.startsWith("/dashboard");
       // Show only when NOT authenticated AND not on /dashboard
-      return !authed && !isDashboard;
+      return !window.location.pathname.startsWith("/dashboard");
+
     };
 
     // initial decide
