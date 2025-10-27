@@ -86,13 +86,15 @@ export default function DashboardHeader() {
 
   // Theme
   // Theme (desktop) — match MobileNavDock behavior
+// ✅ Always start in light mode unless the user explicitly saved dark mode
 const getInitialTheme = () => {
   if (typeof window === "undefined") return false
   const stored = localStorage.getItem("theme")
   if (stored === "dark") return true
-  if (stored === "light") return false
-  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false
+  // Default: light mode (off)
+  return false
 }
+
 
 const [isDark, setIsDark] = useState(getInitialTheme)
 

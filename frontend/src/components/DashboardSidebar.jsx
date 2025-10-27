@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { NavLink, useLocation } from "react-router-dom"
+import { NavLink, Link, useLocation } from "react-router-dom"
 import {
   LayoutGrid,
   User,
@@ -81,7 +81,11 @@ export default function DashboardSidebar() {
               QF
             </span>
             <div className="leading-tight">
-              <div className="text-sm font-semibold text-gray-900 dark:text-white">QFS Dashboard</div>
+              <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                <Link to='/'>
+                QFS Dashboard
+                </Link>
+                </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">Navigation</div>
             </div>
           </div>
