@@ -97,7 +97,7 @@ export async function register(req, res) {
 });
 
 
-    res.json({ message: "Registered. Check your email for verification link." });
+    res.json({ message: "Registered, Check your inbox or spam folder to verify your email.." });
   } catch (err) {
     if (err.code === "P2002" && err.meta?.target?.includes("username")) {
       return res.status(400).json({ message: "Username already taken. Choose a different one." });

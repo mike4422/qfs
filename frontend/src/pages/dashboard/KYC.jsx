@@ -1,6 +1,7 @@
 // src/pages/dashboard/Kyc.jsx
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useAuth } from "../../store/auth"
+import api from "../../utils/api"
 import {
   IdCard, Globe, User, Calendar, Mail, Phone, MapPin, FileText,
   UploadCloud, CheckCircle2, ShieldCheck, AlertTriangle, Loader2
@@ -79,16 +80,9 @@ export default function Kyc() {
     ;(async () => {
       setLoadingSummary(true)
       try {
-        const res = await fetch("/api/me/summary", {
-          credentials: "include",
-          headers: {
-            Accept: "application/json",
-            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-          },
-        })
-        const j = await res.json().catch(()=> ({}))
-        if (!alive) return
-        setSummary(j || {})
+       const { data } = await api.get("/me/summary")
+       if (!alive) return
+       setSummary(data || {})
       } catch {
         if (alive) setSummary(null)
       } finally {
@@ -148,18 +142,11 @@ export default function Kyc() {
       // pass a 'consent' flag if needed by backend
       fd.append("consent", "true")
 
-      const res = await fetch("/api/kyc/submit", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-        },
-        body: fd
-      })
-      const j = await res.json().catch(()=> ({}))
-      if (!res.ok) {
-        throw new Error(j.message || "Submission failed")
-      }
+       const { data: submitResp } = await api.post("/kyc/submit", fd, {
+    // Tip: with Axios + FormData in the browser, you can omit Content-Type,
+    // but adding it is harmless; axios will set the boundary correctly.
+    headers: { "Content-Type": "multipart/form-data" },
+    })
       setDone({ type: "success", message: "KYC submitted successfully. We’ll notify you once it’s reviewed." })
       // optionally refresh summary
       // refresh user profile so UI reflects the new KYC status immediately
