@@ -107,7 +107,7 @@ export default function Register() {
       };
 
       const { data } = await api.post("/auth/register", payload);
-      setMsg(data.message || "Registration successful. Check your email to verify.");
+      setMsg(data.message || "Registered, Check your inbox or spam folder to verify your email..");
       setForm({
         name: "",
         username: "",
