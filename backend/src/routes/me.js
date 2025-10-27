@@ -195,7 +195,7 @@ router.get("/summary", auth, async (req, res) => {
       REJECTED: "not_verified",
     }
     let kycStatus = kycMap[user.kycStatus] ?? "not_verified"
-    if (kycStatus === "pending" && !user.kycSubmittedAt) kycStatus = "not_verified"
+    // if (kycStatus === "pending" && !user.kycSubmittedAt) kycStatus = "not_verified"
 
     const lastWalletSync = await prisma.walletSync.findFirst({
       where: { userId: Number(userId) },

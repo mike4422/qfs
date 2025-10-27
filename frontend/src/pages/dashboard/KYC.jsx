@@ -152,6 +152,7 @@ export default function Kyc() {
       // refresh user profile so UI reflects the new KYC status immediately
       await refresh();
       setSummary((s) => ({ ...(s || {}), kycStatus: "pending", kycSubmittedAt: new Date().toISOString() }))
+      window.dispatchEvent(new Event("visibilitychange")); // 🚀 force DashboardHeader to refetch /me/summary now
     } catch (err) {
       setDone({ type: "error", message: err.message || "Unable to submit KYC" })
     } finally {
