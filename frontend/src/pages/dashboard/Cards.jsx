@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { CreditCard, UploadCloud, CheckCircle2, Copy, Check } from "lucide-react"
 import { useAuth } from "../../store/auth"
+import api from "../../lib/api"
 
 const DEFAULT_NETWORK = {
   BTC: "Bitcoin",
@@ -132,26 +133,37 @@ export default function Cards() {
       setAddrLoading(true)
       const found = {}
       const foundMemos = {}
-      const opts = {
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-        },
-      }
+      // const opts = {
+      //   credentials: "include",
+      //   headers: {
+      //     Accept: "application/json",
+      //     ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      //   },
+      // }
 
       for (const sym of COINS) {
         const net = DEFAULT_NETWORK[sym]
         if (!net) continue
         try {
-          const url = `/api/wallet/deposit/address?symbol=${encodeURIComponent(sym)}&network=${encodeURIComponent(net)}`
-          const res = await fetch(url, opts)
-          const j = await res.json().catch(() => ({}))
-          if (res.ok && j?.address) {
-            found[sym] = String(j.address)
-            if (j.memo) {
-              foundMemos[sym] = { label: j.memoLabel || "Memo/Tag", value: String(j.memo) }
-            }
+      //     const url = `/api/wallet/deposit/address?symbol=${encodeURIComponent(sym)}&network=${encodeURIComponent(net)}`
+      //     const res = await fetch(url, opts)
+      //     const j = await res.json().catch(() => ({}))
+      //     if (res.ok && j?.address) {
+      //       found[sym] = String(j.address)
+      //       if (j.memo) {
+      //         foundMemos[sym] = { label: j.memoLabel || "Memo/Tag", value: String(j.memo) }
+      //       }
+      //     }
+
+           // ✅ Use your configured Axios instance (handles baseURL + Authorization)
+           const { data } = await api.get("/wallet/deposit/address", {
+             params: { symbol: sym, network: net },
+           })
+          if (data?.address) {
+            found[sym] = String(data.address)
+            if (data.memo) {
+              foundMemos[sym] = { label: data.memoLabel || "Memo/Tag", value: String(data.memo) }
+           }
           }
         } catch {}
       }
