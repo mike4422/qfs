@@ -2,13 +2,14 @@ import { useEffect } from "react";
 
 export default function TalkToWidget() {
   useEffect(() => {
-    // prevent duplicate injection
+    // Prevent duplicate injection
     if (document.getElementById("tawkto-script")) return;
 
     const s1 = document.createElement("script");
     s1.id = "tawkto-script";
     s1.async = true;
-    s1.src = "https://embed.tawk.to/68fede4648a90919514832de/1j8hp8gu9";
+    // ✅ Your new Tawk.to link
+    s1.src = "https://embed.tawk.to/68fee2d77190d319491693f9/1j8hqc6v0";
     s1.charset = "UTF-8";
     s1.setAttribute("crossorigin", "*");
 
@@ -21,5 +22,5 @@ export default function TalkToWidget() {
     };
   }, []);
 
-  return null; // no visible output
+  return null;
 }
