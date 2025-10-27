@@ -8,7 +8,7 @@ let transporter; // singleton / pooled
 
 function buildTransporter() {
   const host = SMTP?.host || process.env.SMTP_HOST || "smtp.hostinger.com";
-  const port = Number(SMTP?.port || process.env.SMTP_PORT || 465);
+  const port = Number(SMTP?.port || process.env.SMTP_PORT || 587);
   const user = SMTP?.user || process.env.SMTP_USER;
   const pass = SMTP?.pass || process.env.SMTP_PASS;
 
@@ -32,7 +32,7 @@ function buildTransporter() {
   const t = nodemailer.createTransport({
     host,
     port,
-    secure: port === 465, // true for SSL (465), false for TLS (587)
+    secure: port === 587, // true for SSL (465), false for TLS (587)
     auth: {
       user,
       pass,
