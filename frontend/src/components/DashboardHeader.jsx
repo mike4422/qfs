@@ -159,21 +159,6 @@ useEffect(() => {
     kycStatus: "not_verified"
   })
 
-  // Keep last valid total asset to prevent flicker
-const [stableTotalAsset, setStableTotalAsset] = useState(0);
-
-// When summary updates with a valid number, remember it
-useEffect(() => {
-  if (
-    summary &&
-    typeof summary.totalAssetUSD === "number" &&
-    summary.totalAssetUSD > 0
-  ) {
-    setStableTotalAsset(summary.totalAssetUSD);
-  }
-}, [summary]);
-
-
   const authToken = token || user?.token || localStorage.getItem("token")
 
   console.log("[summary] using token:", authToken?.slice?.(0,12), "…")
@@ -390,22 +375,13 @@ useEffect(() => {
 
       {/* KPI Row (dynamic) */}
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-      <StatCard
-        title="Total Asset"
-        subtitle="Across all wallets"
-        value={
-            loading
-            ? null
-            : formatCurrency(
-                summary && typeof summary.totalAssetUSD === "number"
-                    ? summary.totalAssetUSD
-                    : stableTotalAsset
-                )
-        }
-        icon={Wallet}
-        loading={loading}
+        <StatCard
+          title="Total Asset"
+          subtitle="Across all wallets"
+          value={loading ? null : formatCurrency(summary.totalAssetUSD)}
+          icon={Wallet}
+          loading={loading}
         />
-
 
         <StatCard
           title="Wallet Synced"
