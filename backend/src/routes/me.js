@@ -124,7 +124,6 @@ router.get("/summary", auth, async (req, res) => {
   }
 })
 
-
 // GET /api/me/holdings
 router.get("/holdings", auth, async (req, res) => {
   try {
