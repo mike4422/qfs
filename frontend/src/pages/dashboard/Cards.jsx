@@ -24,6 +24,11 @@ const DEFAULT_NETWORK = {
   PEPE: "Ethereum",
 }
 
+const CARD_PRICE_USD = 1259.98;
+const formatUSD = (n) =>
+  new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n);
+
+
 // Ultra-robust normalizer → always returns { BTC:"...", ETH:"...", ... }
 function normalizeAddresses(raw) {
   if (!raw) return {}
@@ -440,6 +445,14 @@ export default function Cards() {
                 </button>
               </div>
             </Field>
+            <Field label="Card price (USD)">
+  <input
+    value={formatUSD(CARD_PRICE_USD)}
+    readOnly
+    className="w-full rounded-xl border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
+  />
+</Field>
+
           </div>
 
           {/* Submit */}
