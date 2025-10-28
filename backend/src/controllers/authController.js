@@ -168,3 +168,102 @@ export async function login(req, res) {
     return res.status(500).json({ message: 'Server error during login.' })
   }
 }
+
+
+// --- Forgot / Reset password ---
+export async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body || {}
+    if (!email || !String(email).includes("@")) {
+      return res.status(400).json({ message: "Enter a valid email" })
+    }
+
+    const emailLc = String(email).toLowerCase()
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: emailLc, mode: "insensitive" } },
+      select: { id: true, email: true, name: true }
+    })
+
+    // Always respond the same to avoid user enumeration
+    if (!user) return res.json({ message: "If that email exists, a reset link has been sent." })
+
+    const raw = crypto.randomBytes(32).toString("hex")
+    const hashed = crypto.createHash("sha256").update(raw).digest("hex")
+    const expires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { resetToken: hashed, resetTokenExpires: expires },
+    })
+
+    const base = CLIENT_URL || "https://www.qfsworldwide.net"
+    const url = `${base}/reset-password?token=${raw}`
+
+    try {
+      await sendMail({
+        to: user.email,
+        subject: "Reset your password",
+        html: `
+          <div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:auto;border:1px solid #eee;border-radius:12px;overflow:hidden">
+            <div style="background:#0a0a0a;padding:20px;color:white;text-align:center">
+              <h2 style="margin:0;font-weight:600;">Password Reset</h2>
+            </div>
+            <div style="padding:24px;">
+              <p>Hello ${user.name || ""},</p>
+              <p>Click the button below within the next hour to reset your password:</p>
+              <p style="margin:20px 0;">
+                <a href="${url}" style="display:inline-block;background:#2563eb;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:600">Reset Password</a>
+              </p>
+              <p style="font-size:13px;color:#374151">Or copy this link:</p>
+              <p style="word-break:break-all;color:#2563eb">${url}</p>
+              <p style="margin-top:24px;">— QFS Support</p>
+            </div>
+            <div style="background:#0a0a0a;color:white;text-align:center;padding:12px;font-size:12px;">
+              &copy; ${new Date().getFullYear()} QFS Worldwide
+            </div>
+          </div>
+        `
+      })
+    } catch (_) {}
+
+    return res.json({ message: "If that email exists, a reset link has been sent." })
+  } catch (err) {
+    console.error("POST /auth/forgot error:", err)
+    return res.status(500).json({ message: "Server error" })
+  }
+}
+
+export async function resetPassword(req, res) {
+  try {
+    const { token, password, confirmPassword } = req.body || {}
+    if (!(token && password && confirmPassword)) {
+      return res.status(400).json({ message: "Missing fields" })
+    }
+    if (String(password).length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters" })
+    }
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" })
+    }
+
+    const hashed = crypto.createHash("sha256").update(String(token)).digest("hex")
+    const now = new Date()
+
+    const user = await prisma.user.findFirst({
+      where: { resetToken: hashed, resetTokenExpires: { gt: now } },
+      select: { id: true }
+    })
+    if (!user) return res.status(400).json({ message: "Invalid or expired token" })
+
+    const hash = await bcrypt.hash(String(password), 10)
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hash, resetToken: null, resetTokenExpires: null }
+    })
+
+    return res.json({ message: "Password updated successfully. You can now log in." })
+  } catch (err) {
+    console.error("POST /auth/reset error:", err)
+    return res.status(500).json({ message: "Server error" })
+  }
+}

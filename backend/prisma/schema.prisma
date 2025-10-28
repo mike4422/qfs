@@ -64,6 +64,8 @@ model User {
   role              Role              @default(USER)
   emailVerified     Boolean           @default(false)
   verificationToken String?           @unique
+  resetToken        String?   @unique
+  resetTokenExpires DateTime?
   wallet            String?
   kycStatus         KycStatus         @default(NOT_VERIFIED)
   kycSubmittedAt    DateTime?

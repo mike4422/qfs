@@ -8,6 +8,8 @@ import ISO20022 from "../components/ISO20022.jsx";
 import WhatWeDo from "../components/WhatWeDo.jsx";
 import LatestNews from "../components/LatestNews.jsx";
 import ContactSection from "../components/ContactSection";
+import TalkToWidget from "../components/TalkToWidget";
+
 
 const container = {
   hidden: { opacity: 0 },
@@ -59,6 +61,8 @@ export default function Home(){
        <motion.div variants={item}><LatestNews /></motion.div>
 
         <motion.div variants={item}><ContactSection /></motion.div>
+          <TalkToWidget />
+        
 
         </motion.main>
 

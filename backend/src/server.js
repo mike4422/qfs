@@ -51,6 +51,11 @@ app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")))
 
 app.get('/api/health', (_,res)=>res.json({ ok:true }))
 
+// app.use('/api/auth', (req, res, next) => {
+//   console.log('[AUTH MOUNT]', req.method, req.path);
+//   next();
+// });
+
 app.use('/api/auth', authRoutes)
 app.use('/api/users', usersRoutes)
 app.use('/api/projects', projectsRoutes)
