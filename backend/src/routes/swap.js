@@ -42,19 +42,26 @@ function getUserId(req) {
 
 async function getPricesUSD(symbols) {
   if (!Array.isArray(symbols) || symbols.length === 0) return {};
+
+  // Ensure we hit the backend's absolute URL and only add /api once
+  const base = API_BASE.replace(/\/+$/, ""); // trim trailing slash
   const qs = new URLSearchParams({ symbols: symbols.join(",") }).toString();
-  const url = `${API_BASE}/api/market/prices?${qs}`;
+  const url = `${base}/api/market/prices?${qs}`;
 
   try {
     const r = await fetch(url, { headers: { accept: "application/json" } });
+    if (!r.ok) {
+      console.error("getPricesUSD: non-200 from", url, r.status);
+      return {};
+    }
     const j = await r.json().catch(() => ({}));
-    // shape: { BTC:{priceUsd,...}, ETH:{priceUsd,...}, ... }
     const out = {};
     for (const s of symbols) {
       out[s] = Number(j?.[s]?.priceUsd || 0);
     }
     return out;
-  } catch {
+  } catch (e) {
+    console.error("getPricesUSD: fetch error", e);
     return {};
   }
 }
