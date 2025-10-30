@@ -40,65 +40,38 @@ function getUserId(req) {
   return req?.user?.id ?? req?.user?.userId ?? req?.user?.sub
 }
 
-async function getPricesUSD(symbols, req) {
-  if (!Array.isArray(symbols) || symbols.length === 0) return {};
-
-  // Resolve a safe base: prefer API_URL, else derive from the incoming request host
-  const envBase = (API_BASE || "").replace(/\/+$/, "");
-  const inferredBase = (() => {
-    try {
-      const proto = String(req?.headers?.["x-forwarded-proto"] || req?.protocol || "https");
-      const host  = String(req?.get?.("host") || req?.headers?.host || "");
-      return host ? `${proto}://${host}` : "";
-    } catch { return ""; }
-  })();
-  const base = (envBase || inferredBase || "http://localhost:10000").replace(/\/+$/, "");
-  const qs = new URLSearchParams({ symbols: symbols.join(",") }).toString();
-  const url = `${base}/api/market/prices?${qs}`;
-
-  // 1) Try your own cached endpoint first
-  try {
-    const r = await fetch(url, { headers: { accept: "application/json" } });
-    if (r.ok) {
-      const j = await r.json().catch(() => ({}));
-      const out = {};
-      for (const s of symbols) out[s] = Number(j?.[s]?.priceUsd || 0);
-      // If we actually got non-zero prices for both ends, return them
-      if (Object.values(out).some(v => v > 0)) return out;
-    } else {
-      console.error("getPricesUSD: non-200 from", url, r.status);
-    }
-  } catch (e) {
-    console.error("getPricesUSD: fetch error", url, e?.message || e);
-  }
-
-  // 2) Fallback to CoinGecko (minimal, ids via idMap)
-  try {
-    const ids = symbols.map(s => idMap[s]).filter(Boolean);
-    if (ids.length) {
-      const cgURL = `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(",")}&vs_currencies=usd`;
-      const r2 = await fetch(cgURL, { headers: { accept: "application/json" } });
-      if (r2.ok) {
-        const j2 = await r2.json().catch(() => ({}));
-        const rev = {};
-        // reverse map ids -> symbols
-        for (const [sym, id] of Object.entries(idMap)) rev[id] = sym;
-        const out2 = {};
-        for (const id of Object.keys(j2 || {})) {
-          const sym = rev[id];
-          out2[sym] = Number(j2?.[id]?.usd || 0);
-        }
-        if (Object.values(out2).some(v => v > 0)) return out2;
-      } else {
-        console.error("getPricesUSD: CoinGecko non-200", r2.status);
-      }
-    }
-  } catch (e) {
-    console.error("getPricesUSD: CoinGecko error", e?.message || e);
-  }
-
-  return {};
+function resolveBase(req) {
+  const envBase = (process.env.API_URL || "").replace(/\/+$/, "")
+  if (envBase) return envBase
+  // infer from the request (works behind proxies)
+  const proto = String(req?.headers?.["x-forwarded-proto"] || req?.protocol || "https")
+  const host  = String(req?.get?.("host") || req?.headers?.host || "")
+  return host ? `${proto}://${host}` : "http://localhost:10000"
 }
+
+async function getPricesUSD(symbols, req) {
+  if (!Array.isArray(symbols) || symbols.length === 0) return {}
+
+  const base = resolveBase(req).replace(/\/+$/, "")
+  const qs = new URLSearchParams({ symbols: symbols.join(",") }).toString()
+  const url = `${base}/api/market/prices?${qs}`
+
+  try {
+    const r = await fetch(url, { headers: { accept: "application/json" } })
+    if (!r.ok) {
+      console.error("getPricesUSD: non-200", r.status, url)
+      return {}
+    }
+    const j = await r.json().catch(() => ({}))
+    const out = {}
+    for (const s of symbols) out[s] = Number(j?.[s]?.priceUsd || 0)
+    return out
+  } catch (e) {
+    console.error("getPricesUSD: fetch error", e?.message || e)
+    return {}
+  }
+}
+
 
 
 // GET /api/swap/quote?from=ETH&to=USDT&amount=1.23
