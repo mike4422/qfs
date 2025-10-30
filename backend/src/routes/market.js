@@ -19,96 +19,77 @@ const idMap = {
   TRX:  "tron",
   ADA:  "cardano",
   SOL:  "solana",
-  MATIC:"polygon-ecosystem-token",
+  MATIC:"polygon-ecosystem-token", // or "matic-network" (both map to Polygon on CG; use this stable id)
   ALGO: "algorand",
-  TRUMP:"official-trump",
-  PEPE: "pepe",
-  OP:   "optimism",              // ⬅️ include OP since swap supports it
+  TRUMP:"official-trump",          // “Official Trump” token on CoinGecko (symbol: TRUMP)
+  PEPE: "pepe"
 }
 
-// ✅ Per-symbol cache (order-independent)
-const SYM_CACHE = new Map() // key: SYMBOL -> { at:number, priceUsd:number, change24h:number }
-const TTL_MS = 60_000 // 60s
+// 🔹 lightweight cache (per ids list)
+const PRICE_CACHE = new Map() // key: ids string -> { at:number, data: object }
+const TTL_MS = 60_000 // 60s TTL to ride out rate limits
 
 router.get("/prices", async (req, res) => {
   try {
-    const symbols = String(req.query.symbols || "BTC,ETH,USDT,USDC")
+    const symbols = (req.query.symbols || "BTC,ETH,USDT,USDC")
+      .toString()
       .toUpperCase()
       .split(",")
-      .map(s => s.trim())
+      .map((s) => s.trim())
       .filter(Boolean)
 
-    // What do we already have fresh?
+    const ids = symbols.map((s) => idMap[s]).filter(Boolean).join(",")
+    if (!ids) return res.json({})
+
+    // 🔹 serve fresh cache if available
     const now = Date.now()
-    const fresh = new Set()
-    const missing = []
-
-    for (const sym of symbols) {
-      const entry = SYM_CACHE.get(sym)
-      if (entry && (now - entry.at) < TTL_MS) {
-        fresh.add(sym)
-      } else {
-        missing.push(sym)
-      }
+    const cached = PRICE_CACHE.get(ids)
+    if (cached && (now - cached.at) < TTL_MS) {
+      return res.json(cached.data)
     }
 
-    // If anything missing/stale, fetch just those ids from CoinGecko
-    if (missing.length) {
-      const ids = missing.map(s => idMap[s]).filter(Boolean)
-      if (ids.length) {
-        // Use simple/price for reliability + 24h change
-        const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
-          ids.join(",")
-        )}&vs_currencies=usd&include_24hr_change=true`
+    // price + 24h change
+    const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${encodeURIComponent(
+      ids
+    )}&price_change_percentage=24h`
 
-        const headers = { accept: "application/json" }
-        if (process.env.COINGECKO_API_KEY) {
-          headers["x-cg-demo-api-key"] = process.env.COINGECKO_API_KEY
-        }
-
-        try {
-          const r = await fetch(url, { headers })
-          if (r.ok) {
-            const j = await r.json().catch(() => ({}))
-            // Reverse map id -> symbol
-            const rev = Object.entries(idMap).reduce((acc,[sym,id]) => (acc[id]=sym, acc), {})
-            for (const [id, row] of Object.entries(j || {})) {
-              const sym = rev[id]
-              if (!sym) continue
-              const priceUsd  = Number(row?.usd ?? 0)
-              const change24h = Number(row?.usd_24h_change ?? 0)
-              SYM_CACHE.set(sym, { at: now, priceUsd, change24h })
-              fresh.add(sym)
-            }
-          } else {
-            console.error("GET /api/market/prices CoinGecko non-200:", r.status)
-          }
-        } catch (err) {
-          console.error("GET /api/market/prices CoinGecko error:", err?.message || err)
-        }
-      }
+    let data
+    try {
+      const r = await fetch(url, { headers: { "accept": "application/json" }, timeout: 10_000 })
+      data = await r.json()
+    } catch (err) {
+      // network error → fall back to cache if present
+      if (cached) return res.json(cached.data)
+      console.error("GET /api/market/prices network error:", err)
+      return res.json({})
     }
 
-    // Build output from cache only (no empty object surprises)
+    // Shape to { SYMBOL: { priceUsd, change24h } }
     const out = {}
-    for (const sym of symbols) {
-      const e = SYM_CACHE.get(sym)
-      out[sym] = {
-        priceUsd:  Number(e?.priceUsd ?? 0),
-        change24h: Number(e?.change24h ?? 0),
-      }
-    }
 
-    return res.json(out)
+    // ✅ Guard: only iterate when data is an array
+    if (Array.isArray(data)) {
+      for (const item of data) {
+        const sym = Object.keys(idMap).find((k) => idMap[k] === item.id)
+        if (!sym) continue
+        out[sym] = {
+          priceUsd: Number(item.current_price ?? 0),
+          change24h: Number(item.price_change_percentage_24h ?? 0)
+        }
+      }
+      // 🔹 save to cache on success
+      PRICE_CACHE.set(ids, { at: now, data: out })
+      return res.json(out)
+    } else {
+      // e.g., { status:{ error_code:429, ... } } → serve cache if we have it
+      console.error("Unexpected CoinGecko response shape:", data)
+      if (cached) return res.json(cached.data)
+      return res.json({})
+    }
   } catch (e) {
     console.error("GET /api/market/prices error:", e)
-    // Stable: return zeros for requested symbols
-    const symbols = String(req.query.symbols || "").toUpperCase().split(",").filter(Boolean)
-    const out = symbols.reduce((acc, s) => {
-      acc[s] = { priceUsd: 0, change24h: 0 }
-      return acc
-    }, {})
-    return res.json(out)
+    // final fallback: empty (keep endpoint stable)
+    return res.json({})
   }
 })
 

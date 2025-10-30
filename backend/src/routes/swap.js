@@ -40,39 +40,31 @@ function getUserId(req) {
   return req?.user?.id ?? req?.user?.userId ?? req?.user?.sub
 }
 
-function resolveBase(req) {
-  const envBase = (process.env.API_URL || "").replace(/\/+$/, "")
-  if (envBase) return envBase
-  // infer from the request (works behind proxies)
-  const proto = String(req?.headers?.["x-forwarded-proto"] || req?.protocol || "https")
-  const host  = String(req?.get?.("host") || req?.headers?.host || "")
-  return host ? `${proto}://${host}` : "http://localhost:10000"
-}
+async function getPricesUSD(symbols) {
+  if (!Array.isArray(symbols) || symbols.length === 0) return {};
 
-async function getPricesUSD(symbols, req) {
-  if (!Array.isArray(symbols) || symbols.length === 0) return {}
-
-  const base = resolveBase(req).replace(/\/+$/, "")
-  const qs = new URLSearchParams({ symbols: symbols.join(",") }).toString()
-  const url = `${base}/api/market/prices?${qs}`
+  // Ensure we hit the backend's absolute URL and only add /api once
+  const base = API_BASE.replace(/\/+$/, ""); // trim trailing slash
+  const qs = new URLSearchParams({ symbols: symbols.join(",") }).toString();
+  const url = `${base}/api/market/prices?${qs}`;
 
   try {
-    const r = await fetch(url, { headers: { accept: "application/json" } })
+    const r = await fetch(url, { headers: { accept: "application/json" } });
     if (!r.ok) {
-      console.error("getPricesUSD: non-200", r.status, url)
-      return {}
+      console.error("getPricesUSD: non-200 from", url, r.status);
+      return {};
     }
-    const j = await r.json().catch(() => ({}))
-    const out = {}
-    for (const s of symbols) out[s] = Number(j?.[s]?.priceUsd || 0)
-    return out
+    const j = await r.json().catch(() => ({}));
+    const out = {};
+    for (const s of symbols) {
+      out[s] = Number(j?.[s]?.priceUsd || 0);
+    }
+    return out;
   } catch (e) {
-    console.error("getPricesUSD: fetch error", e?.message || e)
-    return {}
+    console.error("getPricesUSD: fetch error", e);
+    return {};
   }
 }
-
-
 
 // GET /api/swap/quote?from=ETH&to=USDT&amount=1.23
 router.get("/quote", auth, async (req, res) => {
@@ -89,7 +81,7 @@ router.get("/quote", auth, async (req, res) => {
     }
     if (!(amount > 0)) return res.status(400).json({ message: "Amount must be > 0" })
 
-    const prices = await getPricesUSD([from, to, req])
+    const prices = await getPricesUSD([from, to])
     const pFrom = prices[from] || 0
     const pTo = prices[to] || 0
     if (!pFrom || !pTo) return res.status(400).json({ message: "Price unavailable" })
@@ -131,7 +123,7 @@ router.post("/execute", auth, async (req, res) => {
     }
     if (!(amt > 0)) return res.status(400).json({ message: "Amount must be > 0" })
 
-    const prices = await getPricesUSD([f, t, req])
+    const prices = await getPricesUSD([f, t])
     const pFrom = prices[f] || 0
     const pTo = prices[t] || 0
     if (!pFrom || !pTo) return res.status(400).json({ message: "Price unavailable" })
