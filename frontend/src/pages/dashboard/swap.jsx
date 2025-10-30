@@ -6,6 +6,7 @@ import {
   CheckCircle2, XCircle
 } from "lucide-react"
 import { useAuth } from "../../store/auth"
+import api from "../../lib/api";
 
 // proxy to avoid hotlink tears
 const proxify = (url) => {
@@ -173,11 +174,7 @@ export default function Swap() {
     ;(async () => {
       setLoadingHoldings(true)
       try {
-        const res = await fetch("/api/me/holdings", {
-          credentials: "include",
-          headers: { "Accept": "application/json", ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) }
-        })
-        const j = await res.json().catch(() => ({}))
+        const { data: j } = await api.get("/me/holdings")
         const map = j && typeof j === "object" && !Array.isArray(j) ? j : {}
         if (alive) setHoldings(map)
       } finally {
@@ -192,9 +189,8 @@ export default function Swap() {
     let alive = true
     ;(async () => {
       try {
-        const symbols = TOKENS.map(t => t.symbol).join(",")
-        const res = await fetch(`/api/market/prices?symbols=${encodeURIComponent(symbols)}`)
-        const j = await res.json().catch(() => ({}))
+       const symbols = TOKENS.map(t => t.symbol).join(",")
+       const { data: j } = await api.get(`/market/prices`, { params: { symbols } })
         if (!alive) return
         const out = {}
         Object.entries(j || {}).forEach(([sym, v]) => { out[sym] = { priceUsd: Number(v?.priceUsd || 0) } })
@@ -211,13 +207,10 @@ export default function Swap() {
     setQuoting(true)
     const t = setTimeout(async () => {
       try {
-        const q = new URLSearchParams({ from: from.symbol, to: to.symbol, amount: String(amtNum) }).toString()
-        const res = await fetch(`/api/swap/quote?${q}`, {
-          credentials: "include",
-          headers: { "Accept": "application/json", ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) }
-        })
-        const j = await res.json().catch(() => ({}))
-        if (alive && res.ok) setQuote(j)
+        const { data: j } = await api.get("/swap/quote", {
+   params: { from: from.symbol, to: to.symbol, amount: String(amtNum) }
+     })
+  if (alive) setQuote(j)
         else if (alive) setQuote(null)
       } catch {
         if (alive) setQuote(null)
@@ -253,22 +246,12 @@ export default function Swap() {
     if (amtNum > fromBal) { setErrMsg("Insufficient balance"); return }
     try {
       setSubmitting(true)
-      const res = await fetch("/api/swap/execute", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-        },
-        body: JSON.stringify({
-          from: from.symbol,
-          to: to.symbol,
-          amount: amtNum,
-          minReceive: Number(minReceive.toFixed(8)),
-        })
-      })
-      const j = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(j.message || "Swap failed")
+      const { data: j } = await api.post("/swap/execute", {
+    from: from.symbol,
+    to: to.symbol,
+    amount: amtNum,
+    minReceive: Number(minReceive.toFixed(8)),
+  })
 
       // Update balances locally
       setHoldings((h) => ({ ...h, ...(j?.balances || {}) }))
