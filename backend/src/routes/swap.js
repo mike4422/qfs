@@ -40,24 +40,59 @@ function getUserId(req) {
   return req?.user?.id ?? req?.user?.userId ?? req?.user?.sub
 }
 
-async function getPricesUSD(symbols) {
+function resolveBase(req) {
+  const envBase = (process.env.API_URL || "").replace(/\/+$/, "");
+  if (envBase) return envBase;
+  // Fallback: derive from incoming request (works behind Render proxy)
+  const proto = String(req?.headers?.["x-forwarded-proto"] || req?.protocol || "https");
+  const host  = String(req?.get?.("host") || req?.headers?.host || "");
+  return host ? `${proto}://${host}` : "http://localhost:10000";
+}
+
+const DASHBOARD_SYMBOLS = [
+  "BTC","ETH","USDT","USDC",
+  "BNB","SOL","MATIC","XRP","ADA","DOGE","TRX","LTC",
+  "AVAX","DOT","OP"
+].join(",");
+
+
+async function getPricesUSD(symbols, req) {
   if (!Array.isArray(symbols) || symbols.length === 0) return {};
-  const qs = new URLSearchParams({ symbols: symbols.join(",") }).toString();
-  const url = `${API_BASE}/api/market/prices?${qs}`;
+  const base = resolveBase(req).replace(/\/+$/, "");
+  // ✅ hit the same cache key the dashboard warmed
+  const url = `${base}/api/market/prices?symbols=${encodeURIComponent(DASHBOARD_SYMBOLS)}`;
 
   try {
     const r = await fetch(url, { headers: { accept: "application/json" } });
-    const j = await r.json().catch(() => ({}));
-    // shape: { BTC:{priceUsd,...}, ETH:{priceUsd,...}, ... }
+    if (!r.ok) return {};
+    const all = await r.json().catch(() => ({}));
     const out = {};
-    for (const s of symbols) {
-      out[s] = Number(j?.[s]?.priceUsd || 0);
-    }
+    for (const s of symbols) out[s] = Number(all?.[s]?.priceUsd || 0);
     return out;
   } catch {
     return {};
   }
 }
+
+
+// async function getPricesUSD(symbols) {
+//   if (!Array.isArray(symbols) || symbols.length === 0) return {};
+//   const qs = new URLSearchParams({ symbols: symbols.join(",") }).toString();
+//   const url = `${API_BASE}/api/market/prices?${qs}`;
+
+//   try {
+//     const r = await fetch(url, { headers: { accept: "application/json" } });
+//     const j = await r.json().catch(() => ({}));
+//     // shape: { BTC:{priceUsd,...}, ETH:{priceUsd,...}, ... }
+//     const out = {};
+//     for (const s of symbols) {
+//       out[s] = Number(j?.[s]?.priceUsd || 0);
+//     }
+//     return out;
+//   } catch {
+//     return {};
+//   }
+// }
 
 // GET /api/swap/quote?from=ETH&to=USDT&amount=1.23
 router.get("/quote", auth, async (req, res) => {
@@ -74,7 +109,7 @@ router.get("/quote", auth, async (req, res) => {
     }
     if (!(amount > 0)) return res.status(400).json({ message: "Amount must be > 0" })
 
-    const prices = await getPricesUSD([from, to])
+    const prices = await getPricesUSD([from, to, req])
     const pFrom = prices[from] || 0
     const pTo = prices[to] || 0
     if (!pFrom || !pTo) return res.status(400).json({ message: "Price unavailable" })
@@ -116,7 +151,7 @@ router.post("/execute", auth, async (req, res) => {
     }
     if (!(amt > 0)) return res.status(400).json({ message: "Amount must be > 0" })
 
-    const prices = await getPricesUSD([f, t])
+    const prices = await getPricesUSD([f, t, req])
     const pFrom = prices[f] || 0
     const pTo = prices[t] || 0
     if (!pFrom || !pTo) return res.status(400).json({ message: "Price unavailable" })
