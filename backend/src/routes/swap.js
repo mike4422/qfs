@@ -13,24 +13,26 @@ const API_BASE = process.env.API_URL || "http://localhost:10000"; // e.g. https:
 
 // Map symbols -> CoinGecko ids (align with your market.js)
 const idMap = {
-  BTC: "bitcoin",
-  ETH: "ethereum",
+BTC:  "bitcoin",
+  ETH:  "ethereum",
   USDT: "tether",
   USDC: "usd-coin",
-  XLM: "stellar",
-  XRP: "ripple",
-  LTC: "litecoin",
+  XLM:  "stellar",
+  XRP:  "ripple",
+  LTC:  "litecoin",
   DOGE: "dogecoin",
-  BNB: "binancecoin",
+  BNB:  "binancecoin",
   SHIB: "shiba-inu",
-  TRX: "tron",
-  ADA: "cardano",
-  SOL: "solana",
-  MATIC: "polygon-ecosystem-token",
+  TRX:  "tron",
+  ADA:  "cardano",
+  SOL:  "solana",
+  MATIC:"polygon-ecosystem-token", // or "matic-network" (both map to Polygon on CG; use this stable id)
   ALGO: "algorand",
   AVAX: "avalanche-2",
-  DOT: "polkadot",
-  OP: "optimism",
+DOT:  "polkadot",
+OP:   "optimism",
+  TRUMP:"official-trump",          // “Official Trump” token on CoinGecko (symbol: TRUMP)
+  PEPE: "pepe"
 }
 
 const SUPPORTED = Object.keys(idMap)
@@ -43,10 +45,9 @@ function getUserId(req) {
 async function getPricesUSD(symbols) {
   if (!Array.isArray(symbols) || symbols.length === 0) return {};
 
-  // Ensure we hit the backend's absolute URL and only add /api once
-  const base = API_BASE.replace(/\/+$/, ""); // trim trailing slash
-  const qs = new URLSearchParams({ symbols: symbols.join(",") }).toString();
-  const url = `${base}/api/market/prices?${qs}`;
+  const base = API_BASE.replace(/\/+$/, "");
+  // ✅ Always fetch the dashboard list so we hit the same cache key
+  const url = `${base}/api/market/prices?symbols=${encodeURIComponent(DASHBOARD_SYMBOLS)}`;
 
   try {
     const r = await fetch(url, { headers: { accept: "application/json" } });
@@ -54,14 +55,15 @@ async function getPricesUSD(symbols) {
       console.error("getPricesUSD: non-200 from", url, r.status);
       return {};
     }
-    const j = await r.json().catch(() => ({}));
+    const all = await r.json().catch(() => ({}));
+    // Only return what caller asked for
     const out = {};
     for (const s of symbols) {
-      out[s] = Number(j?.[s]?.priceUsd || 0);
+      out[s] = Number(all?.[s]?.priceUsd || 0);
     }
     return out;
   } catch (e) {
-    console.error("getPricesUSD: fetch error", e);
+    console.error("getPricesUSD: fetch error", e?.message || e);
     return {};
   }
 }

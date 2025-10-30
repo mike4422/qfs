@@ -21,6 +21,9 @@ const idMap = {
   SOL:  "solana",
   MATIC:"polygon-ecosystem-token", // or "matic-network" (both map to Polygon on CG; use this stable id)
   ALGO: "algorand",
+  AVAX: "avalanche-2",
+DOT:  "polkadot",
+OP:   "optimism",
   TRUMP:"official-trump",          // “Official Trump” token on CoinGecko (symbol: TRUMP)
   PEPE: "pepe"
 }
