@@ -160,10 +160,18 @@ export default function Swap() {
   const toBal = Number(holdings[to.symbol] || 0)
 
   const estRate = useMemo(() => {
-    const pf = prices[from.symbol]?.priceUsd || 0
-    const pt = prices[to.symbol]?.priceUsd || 0
-    return pf && pt ? pf / pt : 0
-  }, [prices, from, to])
+      const pf = prices[from.symbol]?.priceUsd || 0
+      const pt = prices[to.symbol]?.priceUsd || 0
+      if (pf && pt) return pf / pt
+      // Fallback: if we have a live quote and user typed an amount,
+      // approximate rate from that (keeps the UI feeling “alive”).
+      if (quote && Number(amountIn) > 0) {
+        const out = Number(quote.amountOut || 0)
+        const amt = Number(amountIn || 0)
+        if (out > 0 && amt > 0) return out / amt
+      }
+      return 0
+    }, [prices, from, to, quote, amountIn])
 
   const outAfterFee = quote ? quote.amountOut : (amtNum > 0 && estRate ? amtNum * estRate * (1 - 0.0035) : 0)
   const minReceive = outAfterFee * (1 - slippage / 100)
@@ -192,9 +200,13 @@ export default function Swap() {
        const symbols = TOKENS.map(t => t.symbol).join(",")
        const { data: j } = await api.get(`/market/prices`, { params: { symbols } })
         if (!alive) return
-        const out = {}
-        Object.entries(j || {}).forEach(([sym, v]) => { out[sym] = { priceUsd: Number(v?.priceUsd || 0) } })
-        setPrices(out)
+         const out = {}
+         if (j && typeof j === "object") {
+           Object.entries(j).forEach(([sym, v]) => {
+             out[sym] = { priceUsd: Number(v?.priceUsd || 0) }
+           })
+         }
+         setPrices(out) // empty object is fine; UI now falls back to quote
       } catch {}
     })()
     return () => { alive = false }
@@ -272,7 +284,7 @@ export default function Swap() {
         }
       })
     } catch (e) {
-      const msg = e.message || "Swap failed"
+      const msg = e?.response?.data?.message || e.message || "Swap failed"
       setErrMsg(msg)
 
       // 🔹 Error modal

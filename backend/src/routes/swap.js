@@ -7,6 +7,10 @@ import { auth } from "../middleware/auth.js"
 const prisma = new PrismaClient()
 const router = Router()
 
+// put near the top with other imports
+const API_BASE = process.env.VITE_API_BASE || ""; // e.g. https://api.qfsworldwide.net (prod) or http://localhost:10000 (dev)
+
+
 // Map symbols -> CoinGecko ids (align with your market.js)
 const idMap = {
   BTC: "bitcoin",
@@ -37,19 +41,22 @@ function getUserId(req) {
 }
 
 async function getPricesUSD(symbols) {
-  const ids = symbols.map(s => idMap[s]).filter(Boolean).join(",")
-  if (!ids) return {}
-  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${encodeURIComponent(ids)}`
-  const r = await fetch(url, { headers: { "x-cg-demo-api-key": "" } })
-  const data = await r.json().catch(() => null)
-  const out = {}
-  if (Array.isArray(data)) {
-    for (const item of data) {
-      const sym = Object.keys(idMap).find(k => idMap[k] === item.id)
-      if (sym) out[sym] = Number(item.current_price ?? 0)
+  if (!Array.isArray(symbols) || symbols.length === 0) return {};
+  const qs = new URLSearchParams({ symbols: symbols.join(",") }).toString();
+  const url = `${API_BASE}/api/market/prices?${qs}`;
+
+  try {
+    const r = await fetch(url, { headers: { accept: "application/json" } });
+    const j = await r.json().catch(() => ({}));
+    // shape: { BTC:{priceUsd,...}, ETH:{priceUsd,...}, ... }
+    const out = {};
+    for (const s of symbols) {
+      out[s] = Number(j?.[s]?.priceUsd || 0);
     }
+    return out;
+  } catch {
+    return {};
   }
-  return out
 }
 
 // GET /api/swap/quote?from=ETH&to=USDT&amount=1.23
