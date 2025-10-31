@@ -88,12 +88,29 @@ async function addFunds(userId, symbol, amountStr, tx) {
   }
 }
 
-async function wipeAllBalances(userId, tx) {
-  await tx.holding.updateMany({
-    where: { userId },
-    data: { amount: '0', locked: '0' },
+async function deductFunds(userId, symbol, amountStr, tx) {
+  const amount = new Decimal(amountStr);
+  assert(amount.gt(0), 'Amount must be > 0');
+
+  const holding = await tx.holding.findFirst({ where: { userId, symbol } });
+  assert(holding, `No holding for ${symbol}`);
+
+  const avail = new Decimal(holding.amount).minus(holding.locked || 0);
+  assert(avail.gte(amount), 'Insufficient balance');
+
+  await tx.holding.update({
+    where: { id: holding.id },
+    data: { amount: new Decimal(holding.amount).minus(amount).toString() },
   });
 }
+
+
+// async function wipeAllBalances(userId, tx) {
+//   await tx.holding.updateMany({
+//     where: { userId },
+//     data: { amount: '0', locked: '0' },
+//   });
+// }
 
 // --------------- USERS -------------------------
 router.get('/users', async (req, res, next) => {
@@ -220,15 +237,106 @@ try {
 });
 
 
-router.post('/users/:id/wipe-balances', async (req, res, next) => {
+// Manually withdraw from a user's balance (admin action)
+router.post('/users/:id/withdraw', async (req, res, next) => {
+  console.log("[admin] withdraw user", req.params.id, req.body);
   try {
     const id = Number(req.params.id);
-    await prisma.$transaction(async (tx) => {
-      await wipeAllBalances(id, tx);
+    const { symbol, amount, address } = req.body || {};
+    assert(symbol && amount, 'symbol and amount are required');
+
+    const result = await prisma.$transaction(async (tx) => {
+      // 1) debit holding
+      await deductFunds(id, symbol, amount, tx);
+
+      // 2) create a Withdrawal so it appears in Admin → Withdrawals
+      const wd = await tx.withdrawal.create({
+        data: {
+          userId: id,
+          symbol,
+          amount: new Decimal(amount).toString(),
+          address: address || 'ADMIN_ADJUSTMENT',
+          adminStatus: 'APPROVED',
+        },
+      });
+
+      // 3) create a Transaction so it appears in user history
+      await tx.transaction.create({
+        data: {
+          userId: id,
+          type: 'WITHDRAWAL',
+          amount: new Decimal(amount).toString(),
+          status: 'CONFIRMED',
+          symbol,
+          ref: `WD_${wd.id}`,
+        },
+      });
+
+      return wd;
     });
-    res.json({ ok: true });
-  } catch (e) { next(e); }
+
+    // --- identical email to user withdrawal flow ---
+    try {
+      const u = await prisma.user.findUnique({ where: { id } });
+      if (u?.email) {
+        const totalUSD = await computeTotalUSD(id);
+        const totalTxt = `$${totalUSD.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`;
+
+        await sendMail({
+          to: u.email,
+          subject: `Withdrawal Approved`,
+          html: `
+            <div style="font-family:Arial,Helvetica,sans-serif;max-width:620px;margin:auto;border:1px solid #eee;border-radius:12px;overflow:hidden">
+              <div style="background:#0a0a0a;padding:20px;color:#fff;text-align:center">
+                <h2 style="margin:0;font-weight:600;">Withdrawal Approved</h2>
+              </div>
+              <div style="padding:24px;">
+                <p>Hello ${u.name || ''},</p>
+                <p>Your withdrawal has been successfully processed:</p>
+                <table style="width:100%;border-collapse:collapse;margin:12px 0 6px 0">
+                  <tr><td style="padding:6px 0"><b>Asset</b></td><td>${symbol}</td></tr>
+                  <tr><td style="padding:6px 0"><b>Amount</b></td><td>${amount} ${symbol}</td></tr>
+                  <tr><td style="padding:6px 0"><b>Address</b></td><td><code>${address || 'N/A'}</code></td></tr>
+                  <tr><td style="padding:6px 0"><b>Status</b></td><td><b>APPROVED</b></td></tr>
+                  <tr><td style="padding:6px 0"><b>Total Balance</b></td><td><b>${totalTxt}</b></td></tr>
+                </table>
+                <p style="margin-top:18px;font-size:13px;line-height:1.5;color:#374151">
+                  If you did <b>not</b> authorize this transaction, please
+                  <a href="${(process.env.CLIENT_URL || 'https://www.qfsworldwide.net')}/login">log in</a>
+                  immediately to secure your account and contact support.
+                </p>
+                <p style="margin-top:18px">— QFS Support</p>
+              </div>
+              <div style="background:#0a0a0a;color:#fff;text-align:center;padding:12px;font-size:12px;">
+                &copy; ${new Date().getFullYear()} QFS System
+              </div>
+            </div>
+          `,
+        });
+      }
+    } catch (e) {
+      console.error('[mailer] admin manual withdraw notice failed:', e.message);
+    }
+
+    res.json({ ok: true, withdrawalId: result.id });
+  } catch (e) {
+    next(e);
+  }
 });
+
+
+// router.post('/users/:id/wipe-balances', async (req, res, next) => {
+//   try {
+//     const id = Number(req.params.id);
+//     await prisma.$transaction(async (tx) => {
+//       await wipeAllBalances(id, tx);
+//     });
+//     res.json({ ok: true });
+//   } catch (e) { next(e); }
+// });
 
 router.delete('/users/:id', async (req, res, next) => {
   try {

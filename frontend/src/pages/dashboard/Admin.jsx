@@ -236,6 +236,8 @@ function UsersPanel() {
   const [q, setQ] = useState("");
   const [editUser, setEditUser] = useState(null);
   const [fundUser, setFundUser] = useState(null);
+  const [withdrawUser, setWithdrawUser] = useState(null);
+
 
   useEffect(() => {
     (async () => {
@@ -407,9 +409,10 @@ function UsersPanel() {
                       <PillButton variant="primary" onClick={() => setFundUser(u)}>
                         Fund
                       </PillButton>
-                      <PillButton variant="default" onClick={() => handleWipeBalance(u)}>
-                        Wipe
+                      <PillButton variant="default" onClick={() => setWithdrawUser(u)}>
+                        Withdraw
                       </PillButton>
+
                       <PillButton variant="danger" onClick={() => handleDeleteUser(u)}>
                         Delete
                       </PillButton>
@@ -445,6 +448,19 @@ function UsersPanel() {
           }}
         />
       )}
+
+      {withdrawUser && (
+        <WithdrawModal
+          user={withdrawUser}
+          onClose={() => setWithdrawUser(null)}
+          onWithdrawn={async () => {
+            const { data } = await api.get("/admin/users");
+            setRows(data?.users || []);
+            setWithdrawUser(null);
+          }}
+        />
+      )}
+
     </div>
   );
 }
@@ -686,6 +702,102 @@ function FundModal({ user, onClose, onFunded }) {
     </div>
   );
 }
+
+function WithdrawModal({ user, onClose, onWithdrawn }) {
+  const [symbol, setSymbol] = useState("USDT");
+  const [amount, setAmount] = useState("");
+  const [address, setAddress] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function submit() {
+    if (!amount || Number(amount) <= 0) return alert("Enter a positive amount");
+    if (!address.trim()) return alert("Enter a wallet address");
+    try {
+      setSubmitting(true);
+      await api.post(`/admin/users/${user.id}/withdraw`, { symbol, amount, address });
+      onWithdrawn();
+    } catch (e) {
+      console.error(e);
+      const msg = e?.response?.data?.message || "Failed to withdraw";
+      alert(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center p-4">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-gray-200">
+        <h3 className="text-lg font-semibold">Withdraw From User Balance</h3>
+        <p className="mt-1 text-sm text-gray-600">
+          {user.fullName} • {user.email}
+        </p>
+
+        <div className="mt-4 space-y-4">
+          <FormRow label="Asset">
+            <select
+              value={symbol}
+              onChange={(e) => setSymbol(e.target.value)}
+              className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
+            >
+              {[
+                "USDT",
+                "USDC",
+                "BTC",
+                "ETH",
+                "XRP",
+                "XLM",
+                "BNB",
+                "SOL",
+                "ADA",
+                "MATIC",
+              ].map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </FormRow>
+
+          <FormRow label="Amount">
+            <input
+              type="number"
+              min="0"
+              step="any"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
+            />
+          </FormRow>
+
+          <FormRow label="Wallet Address">
+            <input
+              type="text"
+              placeholder="Enter recipient wallet address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="mt-1 w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-gray-900 px-3 py-2"
+            />
+          </FormRow>
+
+          <div className="rounded-lg bg-amber-50 text-amber-800 text-xs p-2">
+            This immediately deducts the user’s available balance and sends them a professional withdrawal confirmation email identical to user withdrawals.
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center justify-end gap-2">
+          <PillButton variant="ghost" onClick={onClose}>
+            Cancel
+          </PillButton>
+          <PillButton variant="danger" onClick={submit} disabled={submitting}>
+            {submitting ? "Withdrawing..." : "Withdraw"}
+          </PillButton>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
 // ---- WITHDRAWALS PANEL ----------------------------------------------------
 function WithdrawalsPanel() {
