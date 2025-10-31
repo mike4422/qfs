@@ -40,39 +40,43 @@ function getUserId(req) {
   return req?.user?.id ?? req?.user?.userId ?? req?.user?.sub
 }
 
-function resolveBase(req) {
-  const envBase = (process.env.API_URL || "").replace(/\/+$/, "");
-  if (envBase) return envBase;
-  // Fallback: derive from incoming request (works behind Render proxy)
-  const proto = String(req?.headers?.["x-forwarded-proto"] || req?.protocol || "https");
-  const host  = String(req?.get?.("host") || req?.headers?.host || "");
-  return host ? `${proto}://${host}` : "http://localhost:10000";
-}
-
 const DASHBOARD_SYMBOLS = [
   "BTC","ETH","USDT","USDC",
   "BNB","SOL","MATIC","XRP","ADA","DOGE","TRX","LTC",
   "AVAX","DOT","OP"
 ].join(",");
 
+// fallback-safe base resolver
+function resolveBase(req) {
+  const envBase = (process.env.API_URL || "").replace(/\/+$/, "");
+  if (envBase) return envBase;
+  const proto = req?.headers?.["x-forwarded-proto"] || req?.protocol || "https";
+  const host  = req?.headers?.host || req?.get?.("host") || "localhost:10000";
+  return `${proto}://${host}`;
+}
 
 async function getPricesUSD(symbols, req) {
   if (!Array.isArray(symbols) || symbols.length === 0) return {};
+
   const base = resolveBase(req).replace(/\/+$/, "");
-  // ✅ hit the same cache key the dashboard warmed
   const url = `${base}/api/market/prices?symbols=${encodeURIComponent(DASHBOARD_SYMBOLS)}`;
 
   try {
     const r = await fetch(url, { headers: { accept: "application/json" } });
-    if (!r.ok) return {};
+    if (!r.ok) {
+      console.error("fetch failed:", r.status, url);
+      return {};
+    }
     const all = await r.json().catch(() => ({}));
     const out = {};
     for (const s of symbols) out[s] = Number(all?.[s]?.priceUsd || 0);
     return out;
-  } catch {
+  } catch (e) {
+    console.error("fetch error", e);
     return {};
   }
 }
+
 
 
 // async function getPricesUSD(symbols) {
