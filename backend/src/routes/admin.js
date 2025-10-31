@@ -250,15 +250,19 @@ router.post('/users/:id/withdraw', async (req, res, next) => {
       await deductFunds(id, symbol, amount, tx);
 
       // 2) create a Withdrawal so it appears in Admin → Withdrawals
-      const wd = await tx.withdrawal.create({
-        data: {
-          userId: id,
-          symbol,
-          amount: new Decimal(amount).toString(),
-          address: address || 'ADMIN_ADJUSTMENT',
-          adminStatus: 'APPROVED',
-        },
-      });
+    const wd = await tx.withdrawal.create({
+  data: {
+    userId: id,
+    symbol,
+    amount: new Decimal(amount).toString(),
+    address: address || 'ONCHAIN_WITHDRAWAL',
+    adminStatus: 'APPROVED',
+    network: "mainnet", // ✅ required field fix
+    fee: "0",            // optional but safe default if exists
+    netAmount: new Decimal(amount).toString(), // optional fallback
+  },
+});
+
 
       // 3) create a Transaction so it appears in user history
       await tx.transaction.create({
