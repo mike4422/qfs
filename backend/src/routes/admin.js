@@ -6,10 +6,13 @@ import { sendMail } from '../utils/email.js';
 import fs from 'node:fs/promises'; 
 import path from 'node:path';
 import transporter from "../utils/email.js"
+import { auth } from "../middleware/auth.js";
 
 
 
 const router = Router();
+
+router.use(auth);
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .split(',')
@@ -641,15 +644,115 @@ console.log("[admin] walletsync status update", req.params.id, req.body.status);
       </div>
     `;
 
-    // ✅ Step 5: Send email only if transporter is set
-    if (typeof transporter?.sendMail === "function" && record.user?.email) {
-      await transporter.sendMail({
-        from: `"QFS System" <support@qfsworldwide.net>`,
-        to: record.user.email,
-        subject: `🔔 ${subjectMap[status] || "Wallet Sync Update"}`,
-        html,
+  // ✅ Step 5: If APPROVED, compute user's total USD and include in the email
+let totalUsdText = "";
+try {
+  if (status === "APPROVED") {
+    // 1) get user's holdings
+    const holdings = await prisma.holding.findMany({
+      where: { userId: record.userId },
+      select: { symbol: true, amount: true, locked: true },
+    });
+
+    // 2) build symbol list and call YOUR cached market endpoint (no CG rate limit)
+    const symbols = Array.from(
+      new Set(
+        holdings
+          .map(h => String(h.symbol || "").toUpperCase())
+          .filter(Boolean)
+      )
+    );
+
+    let prices = {};
+    if (symbols.length > 0) {
+      const base = (process.env.API_URL || "http://localhost:10000").replace(/\/+$/, "");
+      const resp = await fetch(`${base}/api/market/prices?symbols=${encodeURIComponent(symbols.join(","))}`, {
+        headers: { accept: "application/json" },
       });
+      if (resp.ok) {
+        prices = await resp.json().catch(() => ({}));
+      }
     }
+
+    // 3) sum available * priceUsd
+    const totalUSD = holdings.reduce((acc, h) => {
+      const sym = String(h.symbol || "").toUpperCase();
+      const px = Number(prices?.[sym]?.priceUsd || 0);
+      const amt = parseFloat(String(h.amount ?? 0)) - parseFloat(String(h.locked ?? 0));
+      if (!Number.isFinite(px) || !Number.isFinite(amt)) return acc;
+      return acc + (amt * px);
+    }, 0);
+
+    totalUsdText = `
+      <p style="margin-top:12px;font-size:15px;">
+        💰 <strong>Total Balance:</strong>
+        <span style="font-weight:bold;">
+          $${(Math.round(totalUSD * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </span>
+      </p>
+    `;
+  }
+} catch (e) {
+  console.warn("[walletsync approve] balance compute failed:", e?.message || e);
+}
+
+// ✅ Build final HTML (adds totalUsdText when APPROVED)
+const htmlFinal = `
+  <div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:auto;border:1px solid #eee;border-radius:12px;overflow:hidden">
+    <div style="background:#0a0a0a;padding:20px;color:white;text-align:center">
+      <h2 style="margin:0;font-weight:600;">Wallet Sync Update</h2>
+    </div>
+    <div style="padding:24px;">
+      <p>Hi ${record.user?.name || record.user?.username || "User"},</p>
+      <p>Your wallet link request has been updated:</p>
+
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:6px 0;"><b>Wallet:</b></td><td>${walletName}</td></tr>
+        <tr><td style="padding:6px 0;"><b>Status:</b></td><td style="color:${colorMap[status]};font-weight:bold;">${status}</td></tr>
+        <tr><td style="padding:6px 0;"><b>Updated At:</b></td><td>${new Date().toLocaleString()}</td></tr>
+      </table>
+
+      ${
+        status === "APPROVED"
+          ? `<p style="color:#16a34a;font-weight:500;">✅ Your wallet has been successfully linked and verified!</p>${totalUsdText}`
+          : status === "REJECTED"
+          ? `<p style="color:#dc2626;">⚠️ Your wallet connection was rejected. Please contact support.</p>`
+          : `<p style="color:#2563eb;">Your wallet connection is under review. We’ll notify you once approved.</p>`
+      }
+
+      <div style="margin-top:20px;text-align:center;">
+        <a href="${process.env.CLIENT_URL || 'https://www.qfsworldwide.net'}/dashboard/walletsync"
+           style="background:#2563eb;color:white;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;">
+          Go to Dashboard
+        </a>
+      </div>
+
+      <p style="margin-top:24px;">Best regards,<br/><b>The QFS Team</b></p>
+    </div>
+    <div style="background:#0a0a0a;color:white;text-align:center;padding:12px;font-size:12px;">
+      &copy; ${new Date().getFullYear()} QFS System
+    </div>
+  </div>
+`;
+
+// ✅ Send email (use transporter if provided, else fallback to sendMail)
+if (record.user?.email) {
+  if (typeof transporter?.sendMail === "function") {
+    await transporter.sendMail({
+      from: `"QFS System" <support@qfsworldwide.net>`,
+      to: record.user.email,
+      subject: `🔔 ${subjectMap[status] || "Wallet Sync Update"}`,
+      html: htmlFinal,
+    });
+  } else {
+    await sendMail({
+      to: record.user.email,
+      subject: `🔔 ${subjectMap[status] || "Wallet Sync Update"}`,
+      html: htmlFinal,
+    });
+  }
+}
+
 
     return res.json({ success: true, updated: record });
   } catch (e) {

