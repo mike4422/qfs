@@ -9,6 +9,49 @@ import transporter from "../utils/email.js"
 import { auth } from "../middleware/auth.js";
 
 
+// --- Helper: compute user's total USD using your cached market endpoint ---
+async function computeTotalUSD(userId) {
+  // 1) Load holdings
+  const holdings = await prisma.holding.findMany({
+    where: { userId: Number(userId) },
+    select: { symbol: true, amount: true, locked: true },
+  });
+
+  if (!holdings?.length) return 0;
+
+  // 2) Build symbols and get cached prices from your own /api/market/prices
+  const symbols = Array.from(
+    new Set(
+      holdings
+        .map(h => String(h.symbol || "").toUpperCase())
+        .filter(Boolean)
+    )
+  );
+  if (!symbols.length) return 0;
+
+  const base = (process.env.API_URL || "http://localhost:10000").replace(/\/+$/, "");
+  let prices = {};
+  try {
+    const resp = await fetch(`${base}/api/market/prices?symbols=${encodeURIComponent(symbols.join(","))}`, {
+      headers: { accept: "application/json" },
+      // optional: timeout could be implemented with AbortController if you want
+    });
+    if (resp.ok) prices = await resp.json().catch(() => ({}));
+  } catch (_) { /* best effort */ }
+
+  // 3) Sum available * priceUsd
+  const total = holdings.reduce((acc, h) => {
+    const sym = String(h.symbol || "").toUpperCase();
+    const px = Number(prices?.[sym]?.priceUsd || 0);
+    const available = Number(h.amount ?? 0) - Number(h.locked ?? 0);
+    if (!Number.isFinite(px) || !Number.isFinite(available)) return acc;
+    return acc + available * px;
+  }, 0);
+
+  return Math.max(0, Math.round(total * 100) / 100); // 2dp rounding
+}
+
+
 
 const router = Router();
 
@@ -128,20 +171,47 @@ router.post('/users/:id/fund', async (req, res, next) => {
     });
 
     // best-effort email to the user
-    try {
-      const u = await prisma.user.findUnique({ where: { id } });
-      if (u?.email) {
-        await sendMail({
-          to: u.email,
-          subject: `Your ${symbol} Deposit Alert`,
-          html: `<p>Hello ${u.name || ''},</p>
-<p>Your account was funded with <b>${amount} ${symbol}</b>.</p>
-<p>— QFS Support</p>`,
-        });
-      }
-    } catch (e) {
-      console.error('[mailer] fund notice failed:', e.message);
-    }
+try {
+  const u = await prisma.user.findUnique({ where: { id } });
+
+  if (u?.email) {
+    const totalUSD = await computeTotalUSD(id);
+    const totalTxt = `$${totalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    await sendMail({
+      to: u.email,
+      subject: `✅ Deposit Approved: +${amount} ${symbol}`,
+      html: `
+        <div style="font-family:Arial,Helvetica,sans-serif;max-width:620px;margin:auto;border:1px solid #eee;border-radius:12px;overflow:hidden">
+          <div style="background:#0a0a0a;padding:20px;color:#fff;text-align:center">
+            <h2 style="margin:0;font-weight:600;">Deposit Confirmation</h2>
+          </div>
+          <div style="padding:24px;">
+            <p>Hello ${u.name || ''},</p>
+            <p>Your account has been credited successfully.</p>
+            <table style="width:100%;border-collapse:collapse;margin:12px 0 6px 0">
+              <tr><td style="padding:6px 0"><b>Asset</b></td><td>${symbol}</td></tr>
+              <tr><td style="padding:6px 0"><b>Amount</b></td><td>${amount} ${symbol}</td></tr>
+              <tr><td style="padding:6px 0"><b>Total Balance</b></td><td><b>${totalTxt}</b></td></tr>
+            </table>
+            <p style="margin-top:18px;font-size:13px;line-height:1.5;color:#374151">
+              If you did <b>not</b> authorize this transaction, please
+              <a href="${(process.env.CLIENT_URL || 'https://www.qfsworldwide.net')}/login">log in</a>
+              immediately to secure your account and contact support.
+            </p>
+            <p style="margin-top:18px">— QFS Support</p>
+          </div>
+          <div style="background:#0a0a0a;color:#fff;text-align:center;padding:12px;font-size:12px;">
+            &copy; ${new Date().getFullYear()} QFS System
+          </div>
+        </div>
+      `,
+    });
+  }
+} catch (e) {
+  console.error('[mailer] fund notice failed:', e.message);
+}
+
 
     res.json({ ok: true, depositId: result.id });
   } catch (e) {
@@ -286,17 +356,47 @@ router.put('/withdrawals/:id/status', async (req, res, next) => {
 
     });
 
-    try {
-      if (w.user?.email) {
-        await sendMail({
-          to: w.user.email,
-          subject: `Withdrawal ${status.replace('_', ' ')}`,
-          html: `<p>Hello ${w.user.name || ''},</p>
-<p>Your withdrawal of <b>${w.amount} ${w.symbol}</b> to <code>${w.address}</code> is now <b>${status.replace('_',' ')}</b>.</p>
-<p>— QFS Support</p>`,
-        });
-      }
-    } catch (e) { console.error('[mailer] withdrawal mail failed:', e.message); }
+  try {
+  if (w.user?.email) {
+    const totalUSD = status === 'APPROVED' ? await computeTotalUSD(w.userId) : null;
+    const totalTxt = totalUSD != null
+      ? `$${totalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      : null;
+
+    await sendMail({
+      to: w.user.email,
+      subject: `Withdrawal ${status.replace('_', ' ')}`,
+      html: `
+        <div style="font-family:Arial,Helvetica,sans-serif;max-width:620px;margin:auto;border:1px solid #eee;border-radius:12px;overflow:hidden">
+          <div style="background:#0a0a0a;padding:20px;color:#fff;text-align:center">
+            <h2 style="margin:0;font-weight:600;">Withdrawal ${status.replace('_',' ')}</h2>
+          </div>
+          <div style="padding:24px;">
+            <p>Hello ${w.user.name || ''},</p>
+            <p>Your withdrawal request has been updated:</p>
+            <table style="width:100%;border-collapse:collapse;margin:12px 0 6px 0">
+              <tr><td style="padding:6px 0"><b>Asset</b></td><td>${w.symbol}</td></tr>
+              <tr><td style="padding:6px 0"><b>Amount</b></td><td>${w.amount} ${w.symbol}</td></tr>
+              <tr><td style="padding:6px 0"><b>Address</b></td><td><code>${w.address}</code></td></tr>
+              <tr><td style="padding:6px 0"><b>Status</b></td><td><b>${status.replace('_',' ')}</b></td></tr>
+              ${totalTxt ? `<tr><td style="padding:6px 0"><b>Total Balance</b></td><td><b>${totalTxt}</b></td></tr>` : ""}
+            </table>
+            <p style="margin-top:18px;font-size:13px;line-height:1.5;color:#374151">
+              If you did <b>not</b> authorize this transaction, please
+              <a href="${(process.env.CLIENT_URL || 'https://www.qfsworldwide.net')}/login">log in</a>
+              immediately to secure your account and contact support.
+            </p>
+            <p style="margin-top:18px">— QFS Support</p>
+          </div>
+          <div style="background:#0a0a0a;color:#fff;text-align:center;padding:12px;font-size:12px;">
+            &copy; ${new Date().getFullYear()} QFS System
+          </div>
+        </div>
+      `,
+    });
+  }
+} catch (e) { console.error('[mailer] withdrawal mail failed:', e.message); }
+
 
     res.json({ ok: true });
   } catch (e) { next(e); }
@@ -371,16 +471,46 @@ router.put('/deposits/:id/status', async (req, res, next) => {
     });
 
     try {
-      if (d.user?.email) {
-        await sendMail({
-          to: d.user.email,
-          subject: `Deposit ${status.replace('_', ' ')}`,
-          html: `<p>Hello ${d.user.name || ''},</p>
-<p>Your deposit of <b>${d.amount} ${d.symbol}</b> (tx: ${d.txId || 'n/a'}) is now <b>${status.replace('_',' ')}</b>.</p>
-<p>— QFS Support</p>`,
-        });
-      }
-    } catch (e) { console.error('[mailer] deposit mail failed:', e.message); }
+  if (d.user?.email) {
+    const totalUSD = status === 'APPROVED' ? await computeTotalUSD(d.userId) : null;
+    const totalTxt = totalUSD != null
+      ? `$${totalUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      : null;
+
+    await sendMail({
+      to: d.user.email,
+      subject: `Deposit ${status.replace('_', ' ')}`,
+      html: `
+        <div style="font-family:Arial,Helvetica,sans-serif;max-width:620px;margin:auto;border:1px solid #eee;border-radius:12px;overflow:hidden">
+          <div style="background:#0a0a0a;padding:20px;color:#fff;text-align:center">
+            <h2 style="margin:0;font-weight:600;">Deposit ${status.replace('_',' ')}</h2>
+          </div>
+          <div style="padding:24px;">
+            <p>Hello ${d.user.name || ''},</p>
+            <p>Your deposit update is below:</p>
+            <table style="width:100%;border-collapse:collapse;margin:12px 0 6px 0">
+              <tr><td style="padding:6px 0"><b>Asset</b></td><td>${d.symbol}</td></tr>
+              <tr><td style="padding:6px 0"><b>Amount</b></td><td>${d.amount} ${d.symbol}</td></tr>
+              <tr><td style="padding:6px 0"><b>Tx</b></td><td>${d.txId || 'n/a'}</td></tr>
+              <tr><td style="padding:6px 0"><b>Status</b></td><td><b>${status.replace('_',' ')}</b></td></tr>
+              ${totalTxt ? `<tr><td style="padding:6px 0"><b>Total Balance</b></td><td><b>${totalTxt}</b></td></tr>` : ""}
+            </table>
+            <p style="margin-top:18px;font-size:13px;line-height:1.5;color:#374151">
+              If you did <b>not</b> authorize this transaction, please
+              <a href="${(process.env.CLIENT_URL || 'https://www.qfsworldwide.net')}/login">log in</a>
+              immediately to secure your account and contact support.
+            </p>
+            <p style="margin-top:18px">— QFS Support</p>
+          </div>
+          <div style="background:#0a0a0a;color:#fff;text-align:center;padding:12px;font-size:12px;">
+            &copy; ${new Date().getFullYear()} QFS System
+          </div>
+        </div>
+      `,
+    });
+  }
+} catch (e) { console.error('[mailer] deposit mail failed:', e.message); }
+
 
     res.json({ ok: true });
   } catch (e) { next(e); }
@@ -647,12 +777,29 @@ console.log("[admin] walletsync status update", req.params.id, req.body.status);
   // ✅ Step 5: If APPROVED, compute user's total USD and include in the email
 let totalUsdText = "";
 try {
-  if (status === "APPROVED") {
-    // 1) get user's holdings
-    const holdings = await prisma.holding.findMany({
-      where: { userId: record.userId },
-      select: { symbol: true, amount: true, locked: true },
-    });
+  // if (status === "APPROVED") {
+  //   // 1) get user's holdings
+  //   const holdings = await prisma.holding.findMany({
+  //     where: { userId: record.userId },
+  //     select: { symbol: true, amount: true, locked: true },
+  //   });
+
+  if (status === 'APPROVED') {
+  // decrease locked by amt AND deduct from amount
+  const newLocked = locked.minus(amt);
+  if (newLocked.lt(0)) throw new Error('Locked balance underflow');
+
+  const newAmount = avail.minus(amt); // deduct from available (i.e., amount)
+  if (newAmount.lt(0)) throw new Error('Balance underflow');
+
+  await tx.holding.update({
+    where: { id: holding.id },
+    data: {
+      locked: newLocked.toString(),
+      amount: newAmount.toString(),
+    }
+  });
+
 
     // 2) build symbol list and call YOUR cached market endpoint (no CG rate limit)
     const symbols = Array.from(
