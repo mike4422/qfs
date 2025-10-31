@@ -41,6 +41,8 @@ router.get("/prices", async (req, res) => {
       .map((s) => s.trim())
       .filter(Boolean)
 
+      console.log("🔍 Raw symbols:", symbols)
+
     // const ids = symbols.map((s) => idMap[s]).filter(Boolean).join(",")
     // if (!ids) return res.json({})
 
@@ -50,9 +52,12 @@ router.get("/prices", async (req, res) => {
 
     const validSymbols = symbols.filter((s) => idMap[s])
 if (validSymbols.length === 0) return res.json({})
+   console.log("⚠️ No valid symbols found")
 
 const ids = validSymbols.map((s) => idMap[s]).join(",")
 const cacheKey = validSymbols.sort().join(",")  // ← normalized cache key
+console.log("✅ Valid symbols:", validSymbols)
+console.log("🌐 Fetching CoinGecko IDs:", ids)
 const now = Date.now()
 const cached = PRICE_CACHE.get(cacheKey)
 
@@ -70,7 +75,9 @@ const cached = PRICE_CACHE.get(cacheKey)
     try {
       const r = await fetch(url, { headers: { "accept": "application/json" }, timeout: 10_000 })
       data = await r.json()
+       console.log("📦 CoinGecko response:", data)
     } catch (err) {
+      console.error("❌ Network error:", err)
       // network error → fall back to cache if present
       if (cached) return res.json(cached.data)
       console.error("GET /api/market/prices network error:", err)
@@ -79,6 +86,8 @@ const cached = PRICE_CACHE.get(cacheKey)
 
     // Shape to { SYMBOL: { priceUsd, change24h } }
     const out = {}
+    console.log("✅ Final output (shaped):", out)
+
 
     // ✅ Guard: only iterate when data is an array
     if (Array.isArray(data)) {
