@@ -41,12 +41,22 @@ router.get("/prices", async (req, res) => {
       .map((s) => s.trim())
       .filter(Boolean)
 
-    const ids = symbols.map((s) => idMap[s]).filter(Boolean).join(",")
-    if (!ids) return res.json({})
+    // const ids = symbols.map((s) => idMap[s]).filter(Boolean).join(",")
+    // if (!ids) return res.json({})
 
-    // 🔹 serve fresh cache if available
-    const now = Date.now()
-    const cached = PRICE_CACHE.get(ids)
+    // // 🔹 serve fresh cache if available
+    // const now = Date.now()
+    // const cached = PRICE_CACHE.get(ids)
+
+    const validSymbols = symbols.filter((s) => idMap[s])
+if (validSymbols.length === 0) return res.json({})
+
+const ids = validSymbols.map((s) => idMap[s]).join(",")
+const cacheKey = validSymbols.sort().join(",")  // ← normalized cache key
+const now = Date.now()
+const cached = PRICE_CACHE.get(cacheKey)
+
+
     if (cached && (now - cached.at) < TTL_MS) {
       return res.json(cached.data)
     }
@@ -81,7 +91,9 @@ router.get("/prices", async (req, res) => {
         }
       }
       // 🔹 save to cache on success
-      PRICE_CACHE.set(ids, { at: now, data: out })
+      // PRICE_CACHE.set(ids, { at: now, data: out })
+      PRICE_CACHE.set(cacheKey, { at: now, data: out })
+
       return res.json(out)
     } else {
       // e.g., { status:{ error_code:429, ... } } → serve cache if we have it
