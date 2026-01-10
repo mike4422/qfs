@@ -2,68 +2,71 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function Services() {
-  const items = useMemo(() => ([
-    {
-      title: "Wallet Sync",
-      desc: "Seamless BTC, USDT (TRC20), and ETH connectivity with real-time balances and history.",
-      icon: ShieldCheckIcon(),
-      details: [
-        "One-click wallet linking with encrypted key handling.",
-        "Real-time balance polling + webhook push for instant updates.",
-        "Transaction timeline with confirmations, fees, and memos.",
-      ],
-    },
-    {
-      title: "Secure Transactions",
-      desc: "Quantum-grade encryption, multi-sig flows, and anti-tamper integrity checks.",
-      icon: LockIcon(),
-      details: [
-        "Multi-sig approvals with role-based policies.",
-        "Integrity checks (hash, nonce, timestamp) for every hop.",
-        "Automatic anomaly detection on amounts, velocity, and counterparties.",
-      ],
-    },
-    {
-      title: "Project Funding",
-      desc: "Cross-border funding with milestone-based releases and transparent settlement.",
-      icon: GlobeIcon(),
-      details: [
-        "Escrow-style vaults tied to milestones.",
-        "On-chain proofs attached to each release.",
-        "Transparent reporting for backers and auditors.",
-      ],
-    },
-    {
-      title: "KYC & Compliance",
-      desc: "Role-based access, audit trails, and KYC-aware onboarding for regulated environments.",
-      icon: FileCheckIcon(),
-      details: [
-        "Document verification & liveness checks.",
-        "Granular permissions and immutable audit logs.",
-        "Sanctions screening with periodic re-checks.",
-      ],
-    },
-    {
-      title: "Analytics & Reporting",
-      desc: "Live dashboards for volume, velocity, and performance KPIs.",
-      icon: ActivityIcon(),
-      details: [
-        "Cohort and funnel analytics for growth tracking.",
-        "Settlement velocity and risk heatmaps.",
-        "Export to CSV/PDF with scheduled email reports.",
-      ],
-    },
-    {
-      title: "24/7 Support",
-      desc: "Priority assistance for mission-critical operations—anytime, anywhere.",
-      icon: HeadsetIcon(),
-      details: [
-        "Follow-the-sun coverage with <30m target response.",
-        "Runbooks for critical incidents and SLAs.",
-        "Dedicated success managers for enterprise plans.",
-      ],
-    },
-  ]), []);
+  const items = useMemo(
+    () => [
+      {
+        title: "CEX → Wallet Migration",
+        desc: "Move assets from centralized exchanges to a self-custody wallet (Trust Wallet, MetaMask, and more) with a guided, error-resistant flow.",
+        icon: GlobeIcon(),
+        details: [
+          "Step-by-step migration checklist (network selection, memo/tag warnings, address format validation).",
+          "Exchange-safe withdrawal guidance to reduce wrong-network losses.",
+          "Built-in confirmations and “before you send” safety prompts.",
+        ],
+      },
+      {
+        title: "Wallet Connect + Ledger Link",
+        desc: "Link your wallet to Web3LedgerTrust for secure ledger verification and monitoring—without giving up custody.",
+        icon: ShieldCheckIcon(),
+        details: [
+          "Non-custodial linking: you keep control of your funds at all times.",
+          "Ledger link status + verification badges for added trust and clarity.",
+          "Tamper-resistant tracking for balances and on-chain activity.",
+        ],
+      },
+      {
+        title: "10% Monthly Yield",
+        desc: "Earn a consistent 10% monthly yield on eligible wallet funds, with transparent reporting and clear projections.",
+        icon: ActivityIcon(),
+        details: [
+          "Yield dashboard previews (monthly estimates, history, and performance summaries).",
+          "Clear eligibility rules and audit-friendly reporting formats.",
+          "Designed for a clean, simple investor experience—no clutter.",
+        ],
+      },
+      {
+        title: "Real-Time Wallet Monitoring",
+        desc: "Track balances and activity with a live ledger view—built to reduce surprises and increase confidence.",
+        icon: LockIcon(),
+        details: [
+          "Live balance snapshots with a clean transaction timeline view.",
+          "Alerts-ready UI patterns (velocity spikes, unusual transfers, large movements).",
+          "Network-aware labeling (chains, confirmations, and fee visibility).",
+        ],
+      },
+      {
+        title: "Referral Rewards",
+        desc: "Invite users, grow your network, and track rewards in a clear, professional referral dashboard.",
+        icon: FileCheckIcon(),
+        details: [
+          "Referral link + share-ready UI with performance stats and payout status.",
+          "Tier-ready layout for future upgrades (levels, bonuses, milestones).",
+          "Simple, transparent earnings presentation—no confusion.",
+        ],
+      },
+      {
+        title: "24/7 Web3 Support",
+        desc: "Fast, reliable help for migration, linking, and wallet issues—when it matters most.",
+        icon: HeadsetIcon(),
+        details: [
+          "Priority support UX patterns (tickets, status tracking, guided troubleshooting).",
+          "Clear escalation visuals for critical incidents and account safety.",
+          "Support designed to feel premium, calm, and trustworthy.",
+        ],
+      },
+    ],
+    []
+  );
 
   // Modal state
   const [open, setOpen] = useState(false);
@@ -94,32 +97,52 @@ export default function Services() {
   const current = items[index];
 
   return (
-    <section id="services" className="relative py-20">
-      {/* Background image (security theme) */}
+    <section id="services" className="relative overflow-hidden py-20">
+      {/* Background image (Web3 security theme) */}
       <img
-        src="https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=1920&auto=format&fit=crop"
-        alt="Secure fintech infrastructure"
+        src="https://images.unsplash.com/photo-1642104704074-907c0698cbd9?q=80&w=1920&auto=format&fit=crop"
+        alt="Web3 ledger security"
         className="absolute inset-0 -z-10 h-full w-full object-cover"
       />
-      {/* Soft overlay for readability */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-slate-900/75 via-slate-900/65 to-slate-900/60" />
+      {/* Premium overlay for readability */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-slate-950/85 via-slate-950/70 to-slate-950/85" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.18),transparent_55%),radial-gradient(ellipse_at_bottom,rgba(34,197,94,0.14),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.16] [background-image:linear-gradient(to_right,rgba(255,255,255,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.18)_1px,transparent_1px)] [background-size:56px_56px]" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Eyebrow / kicker */}
         <div className="flex items-center justify-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-300/40 bg-white/10 px-5 py-2 text-sm font-semibold text-blue-100 shadow-sm backdrop-blur">
-            NESARA/GESARA
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm font-semibold text-white/90 shadow-sm backdrop-blur">
+            Web3LedgerTrust Toolkit
+            <span className="h-1 w-1 rounded-full bg-cyan-300" />
+            Migration • Ledger Link • Yield
           </span>
         </div>
 
         {/* Title & subtitle */}
         <div className="mt-6 text-center">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
-            Services engineered for trust, speed, and scale
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white">
+            Everything you need to go self-custody—safely.
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-slate-200">
-            Enterprise-grade capabilities to secure assets, streamline operations, and power global growth.
+          <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-white/75">
+            Move crypto off exchanges, link your wallet to a secure Web3 ledger layer, and track everything in a clean, investor-grade dashboard.
           </p>
+
+          {/* Optional micro-CTA (UI only; no functionality change) */}
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <a
+              href="/register"
+              className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-slate-950 bg-white hover:bg-white/90 shadow-lg shadow-cyan-500/10 transition"
+            >
+              Start Migration
+            </a>
+            <a
+              href="/login"
+              className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-white bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur transition"
+            >
+              Link Wallet (Login)
+            </a>
+          </div>
         </div>
 
         {/* Services grid */}
@@ -127,16 +150,17 @@ export default function Services() {
           {items.map((item, i) => (
             <div
               key={item.title}
-              className="group rounded-2xl border border-white/10 bg-white/90 p-6 shadow-xl backdrop-blur transition will-change-transform hover:-translate-y-0.5 hover:shadow-2xl"
+              className="group rounded-2xl border border-white/12 bg-white/5 p-6 shadow-xl shadow-cyan-500/5 backdrop-blur transition will-change-transform hover:-translate-y-0.5 hover:bg-white/[0.07]"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400/90 to-emerald-400/80 text-slate-950 shadow-lg shadow-cyan-500/15">
                 {item.icon}
               </div>
-              <h3 className="mt-4 text-lg font-semibold text-slate-900">{item.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.desc}</p>
+
+              <h3 className="mt-4 text-lg font-semibold text-white">{item.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-white/70">{item.desc}</p>
 
               <button
-                className="mt-5 inline-flex items-center text-sm font-semibold text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
+                className="mt-5 inline-flex items-center text-sm font-semibold text-cyan-200 hover:text-cyan-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/40 rounded-md"
                 onClick={(e) => {
                   triggerRef.current = e.currentTarget;
                   setIndex(i);
@@ -149,7 +173,7 @@ export default function Services() {
                   className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="1.5"
+                  strokeWidth="1.6"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
@@ -159,7 +183,7 @@ export default function Services() {
         </div>
 
         {/* Divider */}
-        <div className="mt-12 h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="mt-12 h-px w-full bg-gradient-to-r from-transparent via-white/15 to-transparent" />
       </div>
 
       {/* ---------- Modal / Slider ---------- */}
@@ -171,7 +195,7 @@ export default function Services() {
         >
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
 
@@ -179,21 +203,22 @@ export default function Services() {
           <div
             ref={dialogRef}
             tabIndex={-1}
-            className="relative z-[61] w-full sm:max-w-2xl mx-auto rounded-2xl bg-white shadow-2xl border border-slate-200 p-5 sm:p-6 focus:outline-none"
+            className="relative z-[61] w-full sm:max-w-2xl mx-auto rounded-2xl border border-white/12 bg-slate-950/75 shadow-2xl shadow-cyan-500/10 p-5 sm:p-6 backdrop-blur focus:outline-none"
           >
             {/* Header */}
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400/90 to-emerald-400/80 text-slate-950 shadow-lg shadow-cyan-500/15">
                 {current.icon}
               </div>
+
               <div className="flex-1">
-                <h3 className="text-xl font-semibold text-slate-900">{current.title}</h3>
-                <p className="mt-1 text-sm text-slate-600">{current.desc}</p>
+                <h3 className="text-xl font-semibold text-white">{current.title}</h3>
+                <p className="mt-1 text-sm text-white/70">{current.desc}</p>
               </div>
 
               <button
                 aria-label="Close"
-                className="ml-2 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50"
+                className="ml-2 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/12 bg-white/5 hover:bg-white/10 text-white transition"
                 onClick={() => {
                   setOpen(false);
                   // return focus to the triggering button
@@ -211,8 +236,8 @@ export default function Services() {
             <div className="mt-5 space-y-3">
               {current.details.map((line, idx) => (
                 <div key={idx} className="flex items-start gap-3">
-                  <span className="mt-1 inline-flex h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600" />
-                  <p className="text-sm leading-relaxed text-slate-700">{line}</p>
+                  <span className="mt-1 inline-flex h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-300" />
+                  <p className="text-sm leading-relaxed text-white/80">{line}</p>
                 </div>
               ))}
             </div>
@@ -225,7 +250,7 @@ export default function Services() {
                     key={dotIdx}
                     className={[
                       "h-1.5 w-1.5 rounded-full transition",
-                      dotIdx === index ? "bg-blue-600" : "bg-slate-300",
+                      dotIdx === index ? "bg-cyan-300" : "bg-white/25",
                     ].join(" ")}
                   />
                 ))}
@@ -233,7 +258,7 @@ export default function Services() {
 
               <div className="flex items-center gap-2">
                 <button
-                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium hover:bg-slate-50"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/12 bg-white/5 px-3 py-2 text-sm font-medium text-white hover:bg-white/10 transition"
                   onClick={() => setIndex((i) => (i - 1 + items.length) % items.length)}
                 >
                   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -241,8 +266,9 @@ export default function Services() {
                   </svg>
                   Prev
                 </button>
+
                 <button
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                  className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-white/90 transition shadow-lg shadow-cyan-500/10"
                   onClick={() => setIndex((i) => (i + 1) % items.length)}
                 >
                   Next

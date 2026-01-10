@@ -13,8 +13,10 @@ export default function Navbar() {
   }, [location.pathname]);
 
   const linkCls = ({ isActive }) =>
-    `px-3 py-2 rounded-md text-sm font-medium ${
-      isActive ? "text-white bg-blue-600" : "text-gray-700 hover:text-blue-600"
+    `px-3 py-2 rounded-lg text-sm font-medium transition ${
+      isActive
+        ? "text-white bg-white/10 border border-white/15"
+        : "text-white/80 hover:text-white hover:bg-white/5"
     }`;
 
   // Helper: go to home then smooth-scroll to a section id (e.g., services)
@@ -33,106 +35,211 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/70 backdrop-blur">
+      {/* ✅ Removed left/right padding so links fit better */}
+      <div className="mx-auto max-w-full px-3 h-16 flex items-center justify-between">
         {/* Brand */}
-       <Link to="/" className="flex items-center space-x-2">
-  <img
-    src="/qfs-logo-b.png"
-    alt="QFS Worldwide Logo"
-    className="w-20 h-20 "
-  />
-  {/* <span className="text-xl font-bold text-blue-700">QFS Worldwide</span> */}
-</Link>
-
+        <Link to="/" className="flex items-center">
+          <img
+            src="/qfs-logo-b.png"
+            alt="Web3LedgerTrust Logo"
+            className="w-25 h-25 object-contain"
+          />
+          {/* <div className="leading-tight">
+            <div className="text-sm sm:text-base font-extrabold tracking-tight text-white">
+              Web3LedgerTrust
+            </div>
+            <div className="text-[11px] text-white/60 hidden sm:block">
+              Non-custodial • 10% monthly yield
+            </div>
+          </div> */}
+        </Link>
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-1">
-          <NavLink to="/" end className={linkCls}>Home</NavLink>
-          <NavLink to="/about" className={linkCls}>About</NavLink>
+          <NavLink to="/" end className={linkCls}>
+            Home
+          </NavLink>
 
-          {/* Services scrolls on the Home page */}
+          {/* Web3LedgerTrust core nav (scroll sections on Home) */}
           <button
-            onClick={() => goToHomeAndScroll("services")}
-            className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600"
+            onClick={() => goToHomeAndScroll("how-it-works")}
+            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition"
           >
-            Services
+            How it Works
           </button>
 
-          {/* ✅ FAQ routes to the FAQ page */}
-          <NavLink to="/faq" className={linkCls}>FAQ</NavLink>
+          <button
+            onClick={() => goToHomeAndScroll("migration")}
+            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition"
+          >
+            Migration
+          </button>
 
-           <NavLink to="/login" className={linkCls}>Log in</NavLink>
+          <button
+            onClick={() => goToHomeAndScroll("ledger-link")}
+            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition"
+          >
+            Ledger Link
+          </button>
 
-          {/* If you have a dedicated /contact page, keep this.
-              If contact is a section on Home, swap to goToHomeAndScroll("contact"). */}
+          <button
+            onClick={() => goToHomeAndScroll("yield")}
+            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition"
+          >
+            10% Yield
+          </button>
+
+          <button
+            onClick={() => goToHomeAndScroll("referrals")}
+            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition"
+          >
+            Referrals
+          </button>
+
+          {/* Keep existing routes */}
+          <NavLink to="/about" className={linkCls}>
+            About
+          </NavLink>
+          <NavLink to="/faq" className={linkCls}>
+            FAQ
+          </NavLink>
+
+          {/* Get in touch scrolls on Home */}
           <button
             onClick={() => goToHomeAndScroll("contact")}
-            className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600"
+            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition"
           >
-            Get in touch
+            Contact
           </button>
 
+          <NavLink to="/login" className={linkCls}>
+            Log in
+          </NavLink>
         </div>
 
         {/* CTA + mobile toggle */}
         <div className="flex items-center gap-3">
           <Link
             to="/register"
-            className="hidden sm:inline-flex px-4 py-2 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow"
+            className="hidden sm:inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-slate-950 bg-white hover:bg-white/90 shadow-lg shadow-cyan-500/10 transition"
           >
-            Get Started
+            Start Migration
           </Link>
+
           <button
-            className="md:hidden inline-flex items-center justify-center p-2 rounded-md border border-gray-300"
+            className="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-xl border border-white/15 bg-white/5 text-white hover:bg-white/10 transition"
             onClick={() => setOpen((v) => !v)}
             aria-label="Toggle menu"
           >
-            ☰
+            <span className="text-lg leading-none">☰</span>
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden border-t border-gray-200">
-          <div className="px-4 py-3 flex flex-col gap-2">
-            <NavLink to="/" end className={linkCls} onClick={() => setOpen(false)}>Home</NavLink>
-            <NavLink to="/about" className={linkCls} onClick={() => setOpen(false)}>About</NavLink>
+        <div className="md:hidden border-t border-white/10 bg-slate-950/80 backdrop-blur">
+          <div className="px-4 py-4 flex flex-col gap-2">
+            <NavLink
+              to="/"
+              end
+              className={linkCls}
+              onClick={() => setOpen(false)}
+            >
+              Home
+            </NavLink>
 
             <button
               onClick={() => {
-                goToHomeAndScroll("services");
+                goToHomeAndScroll("how-it-works");
                 setOpen(false);
               }}
-              className="px-3 py-2 text-left text-sm font-medium text-gray-700 hover:text-blue-600 w-full"
+              className="px-3 py-2 text-left rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition w-full"
             >
-              Services
+              How it Works
             </button>
 
-            {/* ✅ Mobile FAQ routes to the FAQ page and closes the drawer */}
-            <NavLink to="/faq" className={linkCls} onClick={() => setOpen(false)}>FAQ</NavLink>
+            <button
+              onClick={() => {
+                goToHomeAndScroll("migration");
+                setOpen(false);
+              }}
+              className="px-3 py-2 text-left rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition w-full"
+            >
+              Migration
+            </button>
 
-             <NavLink to="/login" className={linkCls}>Log in</NavLink>
+            <button
+              onClick={() => {
+                goToHomeAndScroll("ledger-link");
+                setOpen(false);
+              }}
+              className="px-3 py-2 text-left rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition w-full"
+            >
+              Ledger Link
+            </button>
 
-            {/* Same note as desktop about contact: route or scroll */}
-           <button
+            <button
+              onClick={() => {
+                goToHomeAndScroll("yield");
+                setOpen(false);
+              }}
+              className="px-3 py-2 text-left rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition w-full"
+            >
+              10% Yield
+            </button>
+
+            <button
+              onClick={() => {
+                goToHomeAndScroll("referrals");
+                setOpen(false);
+              }}
+              className="px-3 py-2 text-left rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition w-full"
+            >
+              Referrals
+            </button>
+
+            <NavLink
+              to="/about"
+              className={linkCls}
+              onClick={() => setOpen(false)}
+            >
+              About
+            </NavLink>
+
+            <NavLink
+              to="/faq"
+              className={linkCls}
+              onClick={() => setOpen(false)}
+            >
+              FAQ
+            </NavLink>
+
+            <button
               onClick={() => {
                 goToHomeAndScroll("contact");
                 setOpen(false);
               }}
-              className="px-3 py-2 text-left text-sm font-medium text-gray-700 hover:text-blue-600 w-full"
+              className="px-3 py-2 text-left rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition w-full"
             >
-              Get in touch
+              Contact
             </button>
 
+            <NavLink
+              to="/login"
+              className={linkCls}
+              onClick={() => setOpen(false)}
+            >
+              Log in
+            </NavLink>
 
             <Link
               to="/register"
-              className="mt-1 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 text-center"
+              className="mt-2 inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-slate-950 bg-white hover:bg-white/90 text-center transition"
               onClick={() => setOpen(false)}
             >
-              Get Started
+              Start Migration
             </Link>
           </div>
         </div>

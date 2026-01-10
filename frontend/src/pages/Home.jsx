@@ -9,6 +9,7 @@ import WhatWeDo from "../components/WhatWeDo.jsx";
 import LatestNews from "../components/LatestNews.jsx";
 import ContactSection from "../components/ContactSection";
 import TalkToWidget from "../components/TalkToWidget";
+import ProblemSolution from "../components/ProblemSolution.jsx"
 
 
 const container = {
@@ -47,6 +48,8 @@ export default function Home(){
       style={{ willChange: "opacity, transform" }}
     >
       <motion.div variants={item}><Hero /></motion.div>
+
+       <motion.div variants={item}><ProblemSolution /></motion.div>
 
       <motion.div variants={item}><Services /></motion.div>
 
