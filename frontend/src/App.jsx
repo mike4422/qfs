@@ -8,10 +8,11 @@ import Register from "./pages/Register.jsx";
 import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import ForgotPassword from "./pages/ForgotPassword"
-import ResetPassword from "./pages/ResetPassword"
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Migration from "./pages/Migration.jsx";
 import Yield from "./pages/Yield.jsx";
+import Referral from "./pages/Referral.jsx";
 
 
 // ✅ Dashboard nested pages
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/migration" element={<Migration />} />
           <Route path="/yield" element={<Yield />} />
+          <Route path="/referral" element={<Referral />} />
         </Route>
 
         {/* ✅ Protected Dashboard routes */}

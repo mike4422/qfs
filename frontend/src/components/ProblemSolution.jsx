@@ -183,9 +183,7 @@ export default function ProblemSolution() {
               </a>
             </div>
 
-            <div className="mt-4 text-xs text-white/50">
-              Security note: We will never ask for seed phrases or private keys.
-            </div>
+            
           </div>
         </div>
 

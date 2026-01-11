@@ -77,12 +77,9 @@ export default function Navbar() {
             10% Yield
           </NavLink>
 
-          <button
-            onClick={() => goToHomeAndScroll("referrals")}
-            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition"
-          >
+           <NavLink to="/referral" className={linkCls}>
             Referrals
-          </button>
+          </NavLink>
 
           {/* Keep existing routes */}
           <NavLink to="/about" className={linkCls}>
@@ -156,15 +153,9 @@ export default function Navbar() {
             10% Yield
           </NavLink>
 
-            <button
-              onClick={() => {
-                goToHomeAndScroll("referrals");
-                setOpen(false);
-              }}
-              className="px-3 py-2 text-left rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition w-full"
-            >
-              Referrals
-            </button>
+            <NavLink to="/referral" className={linkCls}>
+            Referrals
+          </NavLink>
 
             <NavLink
               to="/about"

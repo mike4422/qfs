@@ -266,7 +266,7 @@ export default function Cards() {
                 <div className="flex items-center justify-between text-white/90">
                   <div className="inline-flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
-                    <span className="text-sm font-semibold">QFS</span>
+                    <span className="text-sm font-semibold">Web3LedgerTrust</span>
                   </div>
                   <div className="text-xs">
                     {form.type.includes("Master") ? "MASTERCARD" : form.type.includes("Platinum") ? "PLATINUM" : "VISA"}

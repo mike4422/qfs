@@ -19,7 +19,6 @@ import { useAuth } from "../store/auth"
 function linkClasses(isActive) {
   return [
     "group relative flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm transition",
-
     "border border-transparent",
     isActive
       ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-900"
@@ -58,15 +57,21 @@ export default function DashboardSidebar() {
     () => [
       { to: "/dashboard", label: "Overview", icon: LayoutGrid, end: true },
       { to: "/dashboard/profile", label: "Profile", icon: User },
+
+      // Web3LedgerTrust wording (same routes / functionality)
       { to: "/dashboard/wallet-sync", label: "Wallet Sync", icon: RefreshCcw },
-      { to: "/dashboard/transactions", label: "Transactions", icon: ArrowLeftRight },
-      { to: "/dashboard/deposit", label: "Deposit", icon: LogIn },
+      { to: "/dashboard/transactions", label: "Activity", icon: ArrowLeftRight },
+
+      { to: "/dashboard/deposit", label: "Add Funds", icon: LogIn },
       { to: "/dashboard/withdraw", label: "Withdraw", icon: Wallet },
       { to: "/dashboard/buycrypto", label: "Buy Crypto", icon: CreditCard },
       { to: "/dashboard/swap", label: "Swap", icon: ArrowLeftRight },
-      { to: "/dashboard/secure-401-ira", label: "Secure 401 or IRA", icon: Landmark },
+
+      // Keep route as-is, update copy only
+      { to: "/dashboard/secure-401-ira", label: "Secure 401 / IRA", icon: Landmark },
       { to: "/dashboard/cards", label: "Cards", icon: FileCheck2 },
-      { to: "/dashboard/kyc", label: "KYC", icon: Shield },
+
+      { to: "/dashboard/kyc", label: "Verification (KYC)", icon: Shield },
       ...(isAdmin ? [{ to: "/dashboard/admin", label: "Admin", icon: Settings2 }] : []),
     ],
     [isAdmin]
@@ -74,22 +79,27 @@ export default function DashboardSidebar() {
 
   return (
     <aside className="lg:sticky lg:top-6 self-start">
+      {/* ✅ Background color left unchanged (bg-white / dark:bg-gray-900) */}
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-2">
+            {/* Brand mark (web3-oriented, same structure) */}
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-sm font-semibold shadow-sm">
-              QF
+              W3
             </span>
+
             <div className="leading-tight">
               <div className="text-sm font-semibold text-gray-900 dark:text-white">
                 <Link
-    to="/"
-    className="text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-  >
-    QFS Dashboard
-    </Link>
-                </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Navigation</div>
+                  to="/"
+                  className="text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Web3LedgerTrust
+                </Link>
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Dashboard Navigation
+              </div>
             </div>
           </div>
 
@@ -107,18 +117,34 @@ export default function DashboardSidebar() {
             {menu.map(({ to, label, icon: Icon, end }) => {
               const extraActive =
                 to === "/dashboard" && (pathname === "/dashboard" || pathname === "/dashboard/overview")
+
               return (
                 <li key={to}>
                   <NavLink
                     to={to}
                     end={end}
                     className={({ isActive }) => linkClasses(isActive || extraActive)}
+                    title={label}
                   >
                     <ActivePill active={extraActive || undefined} />
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200">
+
+                    {/* Icon capsule (web3 polish, same color system) */}
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200 ring-1 ring-black/5 dark:ring-white/5 transition group-hover:scale-[1.02]">
                       <Icon className="h-4 w-4" />
                     </span>
+
                     <span className="truncate">{label}</span>
+
+                    {/* Subtle “security” shimmer dot on active */}
+                    <span
+                      className={[
+                        "ml-auto h-1.5 w-1.5 rounded-full transition",
+                        (pathname === to || (extraActive && to === "/dashboard"))
+                          ? "bg-emerald-500"
+                          : "bg-transparent",
+                      ].join(" ")}
+                      aria-hidden="true"
+                    />
                   </NavLink>
                 </li>
               )
@@ -127,10 +153,32 @@ export default function DashboardSidebar() {
 
           <div className="my-3 border-t border-gray-100 dark:border-gray-800" />
 
-          <div className="px-2 pb-3">
-            <div className="rounded-xl border border-dashed border-gray-200 p-3 text-xs text-gray-600 dark:border-gray-800 dark:text-gray-300">
-              <p className="font-medium text-gray-900 dark:text-gray-100">Need help?</p>
-              <p className="mt-0.5">
+          <div className="px-2 pb-3 space-y-3">
+            {/* Web3 quick info card */}
+         
+
+            {/* Contextual micro-CTA (no route changes) */}
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700 dark:border-gray-800 dark:bg-gray-900/40 dark:text-gray-200">
+              <div className="flex items-start gap-2">
+                <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 ring-1 ring-emerald-500/20">
+                  <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l7.5 4.5v9L12 21 4.5 16.5v-9L12 3z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-5" />
+                  </svg>
+                </span>
+                <div className="min-w-0">
+                  <p className="font-semibold text-gray-900 dark:text-white">Link your wallet</p>
+                  <p className="mt-0.5 text-gray-600 dark:text-gray-300">
+                    Connect via <span className="font-medium">Ledger Link</span> to enable monitoring and yield tracking.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Help */}
+            <div className="rounded-xl border border-gray-200 bg-white p-3 text-xs text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200">
+              <p className="font-semibold text-gray-900 dark:text-white">Need help?</p>
+              <p className="mt-0.5 text-gray-600 dark:text-gray-300">
                 Visit <span className="font-medium">FAQ</span> or contact support.
               </p>
             </div>
