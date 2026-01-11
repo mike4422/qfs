@@ -8,83 +8,125 @@ export default function FAQ() {
   const faqs = useMemo(
     () => [
       {
-        q: "What is Q-F-S WorldwideNetwork?",
+        q: "What is Web3LedgerTrust?",
         a: (
           <>
-            The Q-F-S WorldwideNetwork (QFS) is a <strong>proposed</strong> financial system
-            that explores using quantum-grade security, modern cryptography, and distributed
-            ledger technology (DLT) to make transactions more transparent, tamper-resistant,
-            and efficient. Unlike conventional, centrally intermediated rails, QFS ideas
-            emphasize <em>decentralized</em> operations and digital settlement—potentially
-            reducing reliance on physical cash and legacy clearing.
-            <br /><br />
-            While real-world timelines and implementations are not finalized, the vision
-            is a more inclusive, auditable, and secure financial ecosystem aligned with
-            asset protection and sovereignty.
+            <strong>Web3LedgerTrust</strong> is a security-first Web3 platform that helps you{" "}
+            <strong>move crypto from centralized exchanges (CEXs) to decentralized wallets</strong>, then{" "}
+            <strong>link your wallet to our ledger layer</strong> for tracking, integrity signals, and safer visibility—
+            without taking custody of your funds.
           </>
         ),
-        id: "qfs-definition",
+        id: "what-is-web3ledgertrust",
       },
       {
-        q: "How does QFS differ from the traditional financial system?",
+        q: "Do you take custody of my crypto?",
         a: (
           <>
-            QFS concepts differ by:
+            No. Web3LedgerTrust is designed for <strong>self-custody</strong>. Your assets remain in your wallet.
+            We do <strong>not</strong> hold your funds.
+          </>
+        ),
+        id: "custody",
+      },
+      {
+        q: "How does the CEX → wallet migration work?",
+        a: (
+          <>
+            You follow a guided flow to withdraw from your exchange to your decentralized wallet:
             <ul className="mt-2 list-disc pl-5 space-y-1">
-              <li>Favoring <strong>decentralized</strong>, verifiable operations over single points of control.</li>
-              <li>Using advanced cryptography and quantum-resilient approaches for <strong>security</strong>.</li>
-              <li>Prioritizing <strong>digital settlement</strong> and programmable value flows over paper-based processes.</li>
-              <li>Designing for <strong>auditability</strong> and transparent messaging (e.g., ISO 20022 semantics).</li>
+              <li>Select the asset and <strong>correct network</strong> (chain) before withdrawing.</li>
+              <li>Confirm the destination wallet address and perform a <strong>small test send</strong> when applicable.</li>
+              <li>Track confirmations and final settlement with clear status updates.</li>
             </ul>
+            The goal is simple: <strong>get your crypto out of custodial risk</strong> and into a wallet you control.
           </>
         ),
-        id: "qfs-vs-traditional",
+        id: "migration",
       },
       {
-        q: "Will QFS eliminate the existence of paper money?",
+        q: "What does “Link Wallet to Ledger” mean?",
         a: (
           <>
-            Reducing reliance on cash is a common goal in QFS discussions. Whether physical
-            currency is entirely eliminated will depend on policy choices, national preferences,
-            regulatory adoption, and the pace of real-world rollout. In practice, hybrid
-            models often coexist during transitions.
-          </>
-        ),
-        id: "paper-money",
-      },
-      {
-        q: "What is wallet synchronization?",
-        a: (
-          <>
-            <strong>Wallet synchronization</strong> is a secure handshake between your wallet
-            and our QFS-aligned infrastructure to register and map your asset identifiers,
-            enabling:
+            Linking your wallet creates a <strong>visibility layer</strong> between your wallet and our security ledger.
+            This enables:
             <ul className="mt-2 list-disc pl-5 space-y-1">
-              <li>Integrity checks and anti-tamper protection</li>
-              <li>Recovery & backup options governed by your consent</li>
-              <li>Faster settlement/verification across connected services</li>
+              <li><strong>Real-time tracking</strong> of activity and confirmations</li>
+              <li><strong>Integrity & risk signals</strong> (e.g., suspicious patterns, anomalous activity)</li>
+              <li><strong>Audit-friendly history</strong> for your own records</li>
             </ul>
-            You maintain ownership; synchronization enhances security and continuity.
+            Linking is designed to be <strong>non-custodial</strong> and <strong>privacy-aware</strong>.
           </>
         ),
-        id: "wallet-sync",
+        id: "ledger-link",
       },
       {
-        q: "How do QFS cards work?",
+        q: "How does the 10% monthly yield work?",
         a: (
           <>
-            QFS cards (virtual or physical) are designed to act as <strong>secure access
-            tokens</strong> to your synchronized wallet and permitted balances. Typical features include:
-            <ul className="mt-2 list-disc pl-5 space-y-1">
-              <li><strong>Tokenized authorization:</strong> the card represents rights to spend/verify, not your seed.</li>
-              <li><strong>Multi-factor security:</strong> PIN/biometrics + device risk checks.</li>
-              <li><strong>Programmable limits:</strong> per-transaction caps, geofencing, and whitelist rules.</li>
-              <li><strong>ISO 20022-aligned messaging:</strong> clear, auditable transaction semantics.</li>
-            </ul>
-            Cards don’t store private keys; they initiate <em>consented</em> transactions through your synced profile.
+            Yield is offered through <strong>opt-in</strong> program terms inside Web3LedgerTrust. When enabled, eligible
+            balances may be routed through supported yield mechanisms depending on the product configuration.
+            <br />
+            <br />
+            <strong>Important:</strong> yield is not guaranteed. Availability, eligibility, and rates may vary by asset,
+            network conditions, and jurisdiction. Always review the product terms and risk disclosures before enabling
+            yield.
           </>
         ),
-        id: "qfs-cards",
+        id: "yield",
+      },
+      
+      {
+        q: "What wallets and exchanges are supported?",
+        a: (
+          <>
+            Web3LedgerTrust is built to support common Web3 onboarding patterns across major exchanges and popular
+            decentralized wallets. Support may vary by chain and asset.
+            <br />
+            <br />
+            If you can withdraw from your exchange to a self-custody wallet address, you can typically use the guided
+            migration flow.
+          </>
+        ),
+        id: "supported",
+      },
+      {
+        q: "Are there any fees to migrate or link my wallet?",
+        a: (
+          <>
+            Standard network fees (gas) may apply depending on the chain and asset. Exchanges may also charge withdrawal
+            fees. Web3LedgerTrust focuses on <strong>reducing mistakes</strong> (wrong chain, wrong address) and improving
+            visibility—so you can move with confidence.
+          </>
+        ),
+        id: "fees",
+      },
+      {
+        q: "What if I sent funds on the wrong network?",
+        a: (
+          <>
+            Wrong-network transfers can be difficult to recover. Before sending, always confirm:
+            <ul className="mt-2 list-disc pl-5 space-y-1">
+              <li>The receiving wallet supports the <strong>exact same network</strong> you’re withdrawing on</li>
+              <li>The address format matches the chain (and any memo/tag requirements)</li>
+              <li>You’ve completed a <strong>small test transfer</strong> when possible</li>
+            </ul>
+            If a mistake happens, contact the exchange and wallet provider immediately. Do not trust third-party “recovery”
+            DMs.
+          </>
+        ),
+        id: "wrong-network",
+      },
+      {
+        q: "Is KYC required?",
+        a: (
+          <>
+            Some features may require identity verification depending on regulations, payout rails, or risk controls.
+            Self-custody migration and basic tracking can often be used without KYC, but eligibility can vary by region and
+            product terms.
+          </>
+        ),
+        id: "kyc",
       },
     ],
     []
@@ -104,26 +146,35 @@ export default function FAQ() {
     <main id="faq" className="relative">
       {/* ===== Hero ===== */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-indigo-900 to-blue-800" />
+        {/* Web3 gradient + mesh */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900" />
         <div
           className="absolute inset-0 opacity-20"
           style={{
             backgroundImage:
-              "radial-gradient(40% 40% at 20% 20%, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 60%), radial-gradient(35% 35% at 80% 30%, rgba(255,255,255,.25) 0%, rgba(255,255,255,0) 60%)",
+              "radial-gradient(40% 40% at 20% 20%, rgba(56,189,248,.35) 0%, rgba(56,189,248,0) 60%), radial-gradient(35% 35% at 80% 30%, rgba(168,85,247,.28) 0%, rgba(168,85,247,0) 60%)",
           }}
         />
+        {/* Glow orbs */}
+        <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-cyan-500/25 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-96 w-96 rounded-full bg-fuchsia-600/20 blur-3xl" />
+        {/* Subtle grid */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(255,255,255,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.18)_1px,transparent_1px)] [background-size:56px_56px]" />
+
         <div className="relative container mx-auto px-6 pt-24 pb-16 text-white">
           <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/20">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-semibold ring-1 ring-white/15 backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
               Help Center
             </span>
-            <h1 className="mt-5 text-4xl sm:text-5xl font-bold leading-tight tracking-tight">
+
+            <h1 className="mt-5 text-4xl sm:text-5xl font-extrabold leading-tight tracking-tight">
               Frequently Asked Questions
             </h1>
-            <p className="mt-4 text-white/90">
-              Clear answers about QFS concepts, wallet synchronization, cards, and the
-              transition away from legacy systems.
+
+            <p className="mt-4 text-white/85">
+              Clear answers about self-custody, CEX migrations, wallet-to-ledger linking, and yield onboarding—
+              written for real users (not traders).
             </p>
 
             {/* Search */}
@@ -132,17 +183,17 @@ export default function FAQ() {
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search FAQs (e.g., cards, paper money, wallet)…"
-                  className="w-full rounded-2xl border border-white/20 bg-white/10 px-4 py-3 pl-10 text-sm text-white placeholder-white/70 outline-none ring-0 focus:border-blue-300 focus:bg-white/15"
+                  placeholder="Search (e.g., wallet, ledger linking, yield, fees)…"
+                  className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 pl-10 text-sm text-white placeholder-white/60 outline-none ring-0 focus:border-cyan-300/60 focus:bg-white/10"
                 />
                 <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/80"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/70"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                 >
-                  <circle cx="11" cy="11" r="7" strokeWidth="1.5" />
-                  <path d="M20 20l-3.5-3.5" strokeWidth="1.5" />
+                  <circle cx="11" cy="11" r="7" strokeWidth="1.6" />
+                  <path d="M20 20l-3.5-3.5" strokeWidth="1.6" />
                 </svg>
               </div>
             </div>
@@ -153,7 +204,7 @@ export default function FAQ() {
       {/* ===== FAQ List ===== */}
       <section className="bg-white py-16 dark:bg-slate-950 sm:py-20">
         <div className="container mx-auto px-6">
-          <div className="mx-auto max-w-3xl divide-y divide-slate-200 rounded-3xl border border-slate-200 bg-white shadow-xl dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
+          <div className="mx-auto max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
             {filtered.map((item, i) => (
               <Accordion key={item.id} {...item} defaultOpen={i === 0} />
             ))}
@@ -161,7 +212,7 @@ export default function FAQ() {
 
           {/* Small CTA */}
           <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-slate-200 bg-slate-50 p-5 text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-            Still have questions?{" "}
+            Still need help?{" "}
             <Link
               to="/#contact"
               onClick={(e) => {
@@ -171,17 +222,20 @@ export default function FAQ() {
                   if (el) window.scrollTo({ top: el.offsetTop - 80, behavior: "smooth" });
                 }
               }}
-              className="font-semibold text-blue-600 hover:underline"
+              className="font-semibold text-cyan-700 hover:underline dark:text-cyan-300"
             >
               Contact our team
             </Link>{" "}
-            and we’ll respond within one business day.
+            for onboarding guidance and security questions.
           </div>
         </div>
       </section>
 
       {/* ===== JSON-LD for SEO ===== */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(toFaqJsonLd(faqs)) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(toFaqJsonLd(faqs)) }}
+      />
     </main>
   );
 }
@@ -192,18 +246,18 @@ function Accordion({ q, a, id, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div id={id} className="group">
+    <div id={id} className="group border-b border-slate-200 last:border-b-0 dark:border-slate-800">
       <button
         aria-expanded={open}
         aria-controls={`${id}-panel`}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:bg-slate-50 focus:outline-none focus-visible:ring dark:hover:bg-slate-800/50"
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/30 dark:hover:bg-slate-800/50"
       >
         <span className="text-base font-semibold text-slate-900 dark:text-white">{q}</span>
         <span
           className={[
-            "inline-flex h-7 w-7 items-center justify-center rounded-full ring-1 ring-slate-300 text-slate-600 transition dark:ring-slate-700 dark:text-slate-300",
-            open ? "rotate-45" : "",
+            "inline-flex h-8 w-8 items-center justify-center rounded-full ring-1 ring-slate-300/80 text-slate-600 transition dark:ring-slate-700 dark:text-slate-300",
+            open ? "rotate-45 bg-slate-50 dark:bg-slate-800/60" : "bg-white dark:bg-slate-900",
           ].join(" ")}
           aria-hidden="true"
         >
@@ -220,7 +274,6 @@ function Accordion({ q, a, id, defaultOpen = false }) {
       >
         <div className="pb-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
           {a}
-          {/* Shareable link */}
           <div className="mt-3">
             <CopyAnchor anchorId={id} />
           </div>
@@ -242,12 +295,12 @@ function CopyAnchor({ anchorId }) {
           setTimeout(() => setCopied(false), 1200);
         } catch {}
       }}
-      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800/60"
+      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900"
       title="Copy link to this answer"
     >
       <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M6 12a4 4 0 014-4h2" />
-        <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M18 12a4 4 0 01-4 4h-2" />
+        <path strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" d="M6 12a4 4 0 014-4h2" />
+        <path strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" d="M18 12a4 4 0 01-4 4h-2" />
         <rect x="3" y="8" width="8" height="8" rx="2" />
         <rect x="13" y="8" width="8" height="8" rx="2" />
       </svg>
@@ -264,9 +317,9 @@ function toFaqJsonLd(faqs) {
     typeof node === "string"
       ? node
       : (node?.props?.children
-          ? (Array.isArray(node.props.children)
-              ? node.props.children.map(strip).join(" ")
-              : strip(node.props.children))
+          ? Array.isArray(node.props.children)
+            ? node.props.children.map(strip).join(" ")
+            : strip(node.props.children)
           : "")
           .toString()
           .replace(/\s+/g, " ")
@@ -275,12 +328,12 @@ function toFaqJsonLd(faqs) {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": faqs.map((f) => ({
+    mainEntity: faqs.map((f) => ({
       "@type": "Question",
-      "name": f.q,
-      "acceptedAnswer": {
+      name: f.q,
+      acceptedAnswer: {
         "@type": "Answer",
-        "text": strip(f.a),
+        text: strip(f.a),
       },
     })),
   };

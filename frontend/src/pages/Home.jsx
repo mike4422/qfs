@@ -10,6 +10,8 @@ import LatestNews from "../components/LatestNews.jsx";
 import ContactSection from "../components/ContactSection";
 import TalkToWidget from "../components/TalkToWidget";
 import ProblemSolution from "../components/ProblemSolution.jsx"
+import HowItWorks from "../components/HowItWorks.jsx"
+import SocialProof from "../components/SocialProof.jsx";
 
 
 const container = {
@@ -51,12 +53,17 @@ export default function Home(){
 
        <motion.div variants={item}><ProblemSolution /></motion.div>
 
-      <motion.div variants={item}><Services /></motion.div>
+       <motion.div variants={item}><HowItWorks /></motion.div>
 
-     <motion.div variants={item}><AboutQFS /></motion.div>
+      <motion.div variants={item}><Services /></motion.div>
 
       <motion.div variants={item}><PartnersCarousel /></motion.div>
 
+      <motion.div variants={item}><AboutQFS /></motion.div>
+
+        <motion.div variants={item}><SocialProof /></motion.div>
+
+    
       <motion.div variants={item}><ISO20022 /> </motion.div>
 
       <motion.div variants={item}><WhatWeDo /></motion.div>

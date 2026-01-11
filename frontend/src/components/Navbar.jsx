@@ -69,26 +69,13 @@ export default function Navbar() {
             How it Works
           </button>
 
-          <button
-            onClick={() => goToHomeAndScroll("migration")}
-            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition"
-          >
+          <NavLink to="/migration" className={linkCls}>
             Migration
-          </button>
+          </NavLink>
 
-          <button
-            onClick={() => goToHomeAndScroll("ledger-link")}
-            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition"
-          >
-            Ledger Link
-          </button>
-
-          <button
-            onClick={() => goToHomeAndScroll("yield")}
-            className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition"
-          >
+         <NavLink to="/yield" className={linkCls}>
             10% Yield
-          </button>
+          </NavLink>
 
           <button
             onClick={() => goToHomeAndScroll("referrals")}
@@ -160,35 +147,14 @@ export default function Navbar() {
               How it Works
             </button>
 
-            <button
-              onClick={() => {
-                goToHomeAndScroll("migration");
-                setOpen(false);
-              }}
-              className="px-3 py-2 text-left rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition w-full"
-            >
-              Migration
-            </button>
+            <NavLink to="/migration" className={linkCls}>
+            Migration
+          </NavLink>
 
-            <button
-              onClick={() => {
-                goToHomeAndScroll("ledger-link");
-                setOpen(false);
-              }}
-              className="px-3 py-2 text-left rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition w-full"
-            >
-              Ledger Link
-            </button>
 
-            <button
-              onClick={() => {
-                goToHomeAndScroll("yield");
-                setOpen(false);
-              }}
-              className="px-3 py-2 text-left rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition w-full"
-            >
-              10% Yield
-            </button>
+           <NavLink to="/yield" className={linkCls}>
+            10% Yield
+          </NavLink>
 
             <button
               onClick={() => {

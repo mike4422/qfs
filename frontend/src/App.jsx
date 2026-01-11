@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
+import Migration from "./pages/Migration.jsx";
+import Yield from "./pages/Yield.jsx";
 
 
 // ✅ Dashboard nested pages
@@ -43,6 +45,8 @@ export default function App() {
           <Route path="login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/migration" element={<Migration />} />
+          <Route path="/yield" element={<Yield />} />
         </Route>
 
         {/* ✅ Protected Dashboard routes */}
