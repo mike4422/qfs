@@ -101,7 +101,7 @@ export default function Hero() {
               <div className="rounded-3xl border border-white/15 bg-white/5 p-2 shadow-2xl shadow-cyan-500/10 backdrop-blur">
                 <div className="relative overflow-hidden rounded-2xl">
                   <img
-                    src="https://images.unsplash.com/photo-1620228885847-9eab2a1adddc?q=80&w=1600&auto=format&fit=crop"
+                    src="hero.png"
                     alt="Web3 ledger dashboard preview"
                     loading="lazy"
                     className="h-[420px] w-full object-cover"

@@ -13,6 +13,8 @@ import ResetPassword from "./pages/ResetPassword";
 import Migration from "./pages/Migration.jsx";
 import Yield from "./pages/Yield.jsx";
 import Referral from "./pages/Referral.jsx";
+import Terms from "./pages/Terms.jsx";
+import Privacy from "./pages/Privacy.jsx";
 
 
 // ✅ Dashboard nested pages
@@ -49,6 +51,8 @@ export default function App() {
           <Route path="/migration" element={<Migration />} />
           <Route path="/yield" element={<Yield />} />
           <Route path="/referral" element={<Referral />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Route>
 
         {/* ✅ Protected Dashboard routes */}
