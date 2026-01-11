@@ -5,7 +5,7 @@ export default function SocialProof() {
   const items = useMemo(
     () => [
       {
-        name: "A. Nwosu",
+        name: "A. Johnson",
         role: "Retail Investor",
         quote:
           "Moving off the exchange felt intimidating, but the steps were clear. Linking my wallet to the ledger gives me visibility without giving up custody.",
@@ -13,7 +13,7 @@ export default function SocialProof() {
         tag: "Self-custody clarity",
       },
       {
-        name: "M. Tan",
+        name: "M. Carter",
         role: "Crypto Trader",
         quote:
           "I like the security-first approach. The workflow helped me verify networks, confirm addresses, and track everything cleanly after transfer.",
@@ -21,7 +21,7 @@ export default function SocialProof() {
         tag: "Security workflow",
       },
       {
-        name: "S. Ibrahim",
+        name: "S. Williams",
         role: "Founder",
         quote:
           "The ledger-link concept is exactly what we needed—proof and monitoring without handing over keys. The UI feels premium and simple.",
@@ -29,7 +29,7 @@ export default function SocialProof() {
         tag: "Visibility layer",
       },
       {
-        name: "K. Adeyemi",
+        name: "K. Davis",
         role: "Portfolio Manager",
         quote:
           "Fast onboarding, clean tracking, and a professional experience. This is how Web3 onboarding should feel for everyday users.",
