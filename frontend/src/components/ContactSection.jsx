@@ -139,7 +139,7 @@ export default function ContactSection() {
                       d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15A2.25 2.25 0 0 1 2.25 17.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.098 1.918l-6.75 3.857a2.25 2.25 0 0 1-2.204 0L3.348 8.911A2.25 2.25 0 0 1 2.25 6.993V6.75"
                     />
                   </svg>
-                  <span>support@qfsworldwide.net</span>
+                  <span>support@web3ledgertrust.com</span>
                 </div>
 
                 <div className="flex items-center gap-3 text-white/80">
