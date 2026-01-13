@@ -33,10 +33,10 @@ import debugSmtp from "./routes/debugSmtp.js";
 const app = express()
 
 const allowed = [
-  "https://qfsworldwide.net",
-  "https://www.qfsworldwide.net",
+  "https://web3ledgertrust.com",
+  "https://www.web3ledgertrust.com",
   "http://localhost:5173",
-  "https://api.qfsworldwide.net" 
+  "https://api.web3ledgertrust.com" 
 ]
 
 app.use(cors({
