@@ -5,7 +5,7 @@ export async function faq(_req, res, _next) {
   res.json([
     { q: 'How does email verification work?', a: 'Click the emailed link to activate your account.' },
     { q: 'What is Wallet Sync?', a: 'Unifies balances and transactions across supported wallets.' },
-    { q: 'How do I request a QFS Card?', a: 'Go to Dashboard → Cards and submit your request.' },
+    { q: 'How do I request a Web3LedgerTrust Card?', a: 'Go to Dashboard → Cards and submit your request.' },
   ])
 }
 

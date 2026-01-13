@@ -8,7 +8,7 @@ const prisma = new PrismaClient()
 const router = Router()
 
 // put near the top with other imports
-const API_BASE = process.env.API_URL || ""; // e.g. https://api.qfsworldwide.net (prod) or http://localhost:10000 (dev)
+const API_BASE = process.env.API_URL || ""; 
 
 
 // Map symbols -> CoinGecko ids (align with your market.js)

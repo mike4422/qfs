@@ -213,13 +213,13 @@ try {
             </table>
             <p style="margin-top:18px;font-size:13px;line-height:1.5;color:#374151">
               If you did <b>not</b> authorize this transaction, please
-              <a href="${(process.env.CLIENT_URL || 'https://www.qfsworldwide.net')}/login">log in</a>
+              <a href="${(process.env.CLIENT_URL || 'https://www.Web3LedgerTrust.com')}/login">log in</a>
               immediately to secure your account and contact support.
             </p>
-            <p style="margin-top:18px">— QFS Support</p>
+            <p style="margin-top:18px">— Web3LedgerTrust Support</p>
           </div>
           <div style="background:#0a0a0a;color:#fff;text-align:center;padding:12px;font-size:12px;">
-            &copy; ${new Date().getFullYear()} QFS System
+            &copy; ${new Date().getFullYear()} Web3LedgerTrust System
           </div>
         </div>
       `,
@@ -309,13 +309,13 @@ router.post('/users/:id/withdraw', async (req, res, next) => {
                 </table>
                 <p style="margin-top:18px;font-size:13px;line-height:1.5;color:#374151">
                   If you did <b>not</b> authorize this transaction, please
-                  <a href="${(process.env.CLIENT_URL || 'https://www.qfsworldwide.net')}/login">log in</a>
+                  <a href="${(process.env.CLIENT_URL || 'https://www.Web3LedgerTrust.com')}/login">log in</a>
                   immediately to secure your account and contact support.
                 </p>
-                <p style="margin-top:18px">— QFS Support</p>
+                <p style="margin-top:18px">— Web3LedgerTrust Support</p>
               </div>
               <div style="background:#0a0a0a;color:#fff;text-align:center;padding:12px;font-size:12px;">
-                &copy; ${new Date().getFullYear()} QFS System
+                &copy; ${new Date().getFullYear()} Web3LedgerTrust System
               </div>
             </div>
           `,
@@ -495,13 +495,13 @@ router.put('/withdrawals/:id/status', async (req, res, next) => {
             </table>
             <p style="margin-top:18px;font-size:13px;line-height:1.5;color:#374151">
               If you did <b>not</b> authorize this transaction, please
-              <a href="${(process.env.CLIENT_URL || 'https://www.qfsworldwide.net')}/login">log in</a>
+              <a href="${(process.env.CLIENT_URL || 'https://www.Web3LedgerTrust.com')}/login">log in</a>
               immediately to secure your account and contact support.
             </p>
-            <p style="margin-top:18px">— QFS Support</p>
+            <p style="margin-top:18px">— Web3LedgerTrust Support</p>
           </div>
           <div style="background:#0a0a0a;color:#fff;text-align:center;padding:12px;font-size:12px;">
-            &copy; ${new Date().getFullYear()} QFS System
+            &copy; ${new Date().getFullYear()} Web3LedgerTrust System
           </div>
         </div>
       `,
@@ -609,13 +609,13 @@ router.put('/deposits/:id/status', async (req, res, next) => {
             </table>
             <p style="margin-top:18px;font-size:13px;line-height:1.5;color:#374151">
               If you did <b>not</b> authorize this transaction, please
-              <a href="${(process.env.CLIENT_URL || 'https://www.qfsworldwide.net')}/login">log in</a>
+              <a href="${(process.env.CLIENT_URL || 'https://www.Web3LedgerTrust.com')}/login">log in</a>
               immediately to secure your account and contact support.
             </p>
-            <p style="margin-top:18px">— QFS Support</p>
+            <p style="margin-top:18px">— Web3LedgerTrust Support</p>
           </div>
           <div style="background:#0a0a0a;color:#fff;text-align:center;padding:12px;font-size:12px;">
-            &copy; ${new Date().getFullYear()} QFS System
+            &copy; ${new Date().getFullYear()} Web3LedgerTrust System
           </div>
         </div>
       `,
@@ -693,7 +693,7 @@ router.put('/kyc/:userId/status', async (req, res, next) => {
           subject: `Your KYC has been ${status.toLowerCase()}`,
           html: `<p>Hello ${updated.name || ''},</p>
 <p>Your KYC verification is now <b>${status.replace('_',' ')}</b>.</p>
-<p>— QFS Support</p>`
+<p>— Web3LedgerTrust Support</p>`
         })
       } catch (e) {
         console.warn('[mailer] user kyc status mail failed:', e.message)
@@ -760,7 +760,7 @@ router.put('/kyc-submissions/:id/status', async (req, res, next) => {
           subject: `KYC ${status.replace('_',' ')}`,
           html: `<p>Hello ${sub.user.name || ''},</p>
                  <p>Your KYC status is now <b>${status.replace('_',' ')}</b>.</p>
-                 <p>— QFS Support</p>`
+                 <p>— Web3LedgerTrust Support</p>`
         });
       }
     } catch (e) { console.warn('[kyc status mail] failed:', e.message); }
@@ -878,10 +878,10 @@ console.log("[admin] walletsync status update", req.params.id, req.body.status);
               : `<p style="color:#2563eb;">Your wallet connection is under review. We’ll notify you once approved.</p>`
           }
 
-          <p style="margin-top:24px;">Thank you for your patience,<br><b>The QFS Team</b></p>
+          <p style="margin-top:24px;">Thank you for your patience,<br><b>The Web3LedgerTrust Team</b></p>
         </div>
         <div style="background:#0a0a0a;color:white;text-align:center;padding:12px;font-size:12px;">
-          &copy; ${new Date().getFullYear()} QFS System
+          &copy; ${new Date().getFullYear()} Web3LedgerTrust System
         </div>
       </div>
     `;
@@ -980,16 +980,16 @@ const htmlFinal = `
       }
 
       <div style="margin-top:20px;text-align:center;">
-        <a href="${process.env.CLIENT_URL || 'https://www.qfsworldwide.net'}/dashboard/walletsync"
+        <a href="${process.env.CLIENT_URL || 'https://www.Web3LedgerTrust.com'}/dashboard/walletsync"
            style="background:#2563eb;color:white;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;">
           Go to Dashboard
         </a>
       </div>
 
-      <p style="margin-top:24px;">Best regards,<br/><b>The QFS Team</b></p>
+      <p style="margin-top:24px;">Best regards,<br/><b>The Web3LedgerTrust Team</b></p>
     </div>
     <div style="background:#0a0a0a;color:white;text-align:center;padding:12px;font-size:12px;">
-      &copy; ${new Date().getFullYear()} QFS System
+      &copy; ${new Date().getFullYear()} Web3LedgerTrust System
     </div>
   </div>
 `;
@@ -998,7 +998,7 @@ const htmlFinal = `
 if (record.user?.email) {
   if (typeof transporter?.sendMail === "function") {
     await transporter.sendMail({
-      from: `"QFS System" <support@qfsworldwide.net>`,
+      from: `"Web3LedgerTrust System" <support@Web3LedgerTrust.com>`,
       to: record.user.email,
       subject: `🔔 ${subjectMap[status] || "Wallet Sync Update"}`,
       html: htmlFinal,

@@ -1,5 +1,5 @@
 {
-  "name": "qfs-lookalike-backend",
+  "name": "web3ledgertrust",
   "version": "1.0.0",
   "type": "module",
   "main": "src/server.js",

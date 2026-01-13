@@ -49,16 +49,16 @@ export async function register(req, res) {
       },
     });
 
-    const link = `https://api.qfsworldwide.net/api/auth/verify?token=${verificationToken}`;
+    const link = `https://api.web3ledgertrust.com/api/auth/verify?token=${verificationToken}`;
 
    await sendMail({
   to: emailLc,
-  subject: "Verify Your Email – QFS Network",
+  subject: "Verify Your Email – Web3 Ledger Trust",
   html: `
     <div style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #ffffff;">
       <!-- Header -->
       <div style="background: linear-gradient(90deg, #2563eb, #1e3a8a); padding: 24px; text-align: center; color: white;">
-        <h2 style="margin: 0; font-weight: 600;">QFS Network</h2>
+        <h2 style="margin: 0; font-weight: 600;">Web3LedgerTrust</h2>
         <p style="margin: 4px 0 0; font-size: 14px; opacity: 0.9;">Secure Financial Infrastructure</p>
       </div>
 
@@ -66,7 +66,7 @@ export async function register(req, res) {
       <div style="padding: 32px 24px;">
         <h3 style="margin-top: 0; color: #111827;">Verify your email address</h3>
         <p style="color: #374151; font-size: 15px; line-height: 1.6;">
-          Thank you for registering with <strong>QFS Network</strong>.<br>
+          Thank you for registering with <strong>Web3LedgerTrust</strong>.<br>
           Please verify your email address to activate your account and start using our secure platform.
         </p>
 
@@ -90,7 +90,7 @@ export async function register(req, res) {
 
       <!-- Footer -->
       <div style="background: #f9fafb; padding: 16px; text-align: center; font-size: 12px; color: #6b7280;">
-        &copy; ${new Date().getFullYear()} QFS Network. All rights reserved.
+        &copy; ${new Date().getFullYear()} Web3 Ledger Trust. All rights reserved.
       </div>
     </div>
   `
@@ -196,7 +196,7 @@ export async function forgotPassword(req, res) {
       data: { resetToken: hashed, resetTokenExpires: expires },
     })
 
-    const base = CLIENT_URL || "https://www.qfsworldwide.net"
+    const base = CLIENT_URL || "https://www.web3ledgertrust.com"
     const url = `${base}/reset-password?token=${raw}`
 
     try {
@@ -216,10 +216,10 @@ export async function forgotPassword(req, res) {
               </p>
               <p style="font-size:13px;color:#374151">Or copy this link:</p>
               <p style="word-break:break-all;color:#2563eb">${url}</p>
-              <p style="margin-top:24px;">— QFS Support</p>
+              <p style="margin-top:24px;">— web3ledgertrust Support</p>
             </div>
             <div style="background:#0a0a0a;color:white;text-align:center;padding:12px;font-size:12px;">
-              &copy; ${new Date().getFullYear()} QFS Worldwide
+              &copy; ${new Date().getFullYear()} Web3Ledgertrust
             </div>
           </div>
         `

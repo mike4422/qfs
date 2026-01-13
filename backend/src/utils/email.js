@@ -19,7 +19,7 @@ function buildTransporter() {
         console.log("[mailer:dry-run]", {
           to: msg.to,
           subject: msg.subject,
-          from: msg.from || SMTP?.from || "support@qfsworldwide.net",
+          from: msg.from || SMTP?.from || "support@Web3LedgerTrust.com",
         });
         return { messageId: "dry-run" };
       },
@@ -60,7 +60,7 @@ function getTransporter() {
 export const sendMail = async ({ to, subject, html, text, replyTo, headers }) => {
   try {
     const tx = getTransporter();
-    const from = SMTP?.from || "QFS Support <support@qfsworldwide.net>";
+    const from = SMTP?.from || "Web3Ledgertrust support <support@web3ledgertrust.com>";
 
     // Auto-generate text from html if not provided (optional)
     // if (!text && html) text = htmlToText(html, { wordwrap: 120 });
@@ -73,8 +73,8 @@ export const sendMail = async ({ to, subject, html, text, replyTo, headers }) =>
       text,
       replyTo: replyTo || from,
       headers: {
-        "X-Mailer": "QFS Mailer",
-        "List-Unsubscribe": "<mailto:support@qfsworldwide.net?subject=unsubscribe>",
+        "X-Mailer": "Web3LedgerTrust Mailer",
+        "List-Unsubscribe": "<mailto:support@Web3LedgerTrust.com?subject=unsubscribe>",
         ...(headers || {}),
       },
     });

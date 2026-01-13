@@ -2,8 +2,8 @@ import cors from "cors";
 
 const allowedOrigins = [
   "http://localhost:5173",         // local dev (Vite)
-  "https://qfsworldwide.net",      // live domain
-  "https://www.qfsworldwide.net",  // with www
+  "https://Web3LedgerTrust.com",      // live domain
+  "https://www.Web3LedgerTrust.com",  // with www
 ];
 
 app.use(

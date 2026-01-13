@@ -14,7 +14,7 @@ const FEEDS = [
 const parser = new Parser({
   timeout: 15000,
   headers: {
-    "User-Agent": "QFS-News-Aggregator/1.2 (+https://qfs.example)",
+    "User-Agent": "Web3LedgerTrust-News-Aggregator/1.2 (+https://qfs.example)",
     "Accept": "application/rss+xml, application/xml;q=0.9, */*;q=0.8",
   },
 });

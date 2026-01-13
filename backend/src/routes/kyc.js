@@ -161,7 +161,7 @@ router.post("/submit", auth, kycFields, async (req, res) => {
           subject: "KYC submitted",
           html: `<p>Hello${updated.name ? " " + updated.name : ""},</p>
 <p>Your KYC was submitted and is now <b>Pending</b>. We’ll email you once it’s reviewed.</p>
-<p>— QFS Support</p>`
+<p>— Web3LedgerTrust Support</p>`
         })
       }
     } catch (e) {

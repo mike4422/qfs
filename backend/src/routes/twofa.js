@@ -22,7 +22,7 @@ router.post("/setup", auth, async (req, res) => {
     const label = user?.email || user?.username || user?.name || `User#${userId}`
 
     const secret = speakeasy.generateSecret({
-      name: `QFS (${label})`,    // shows in authenticator app
+      name: `Web3LedgerTrust (${label})`,    // shows in authenticator app
       length: 20,                 // 20 bytes → base32 ~32 chars
     })
 
